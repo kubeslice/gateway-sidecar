@@ -4,8 +4,58 @@ package sidecar;
 option go_package = ".;sidecar";
 
 import "google/protobuf/empty.proto";
-import "sidecar.proto";
 
+// SidecarResponse represents the Sidecar response format.
+message SidecarResponse {
+    string statusMsg = 1;
+}
+
+// Status of the Pod.
+enum Status {
+  POD_INITIALIZING = 0;
+  POD_HEALTHY = 1;
+  POD_UNHEALTHY = 2;
+  POD_INVALID_TOKEN = 3;
+}
+
+// slice gateway-host-type
+enum SliceGwHostType {
+    SLICE_GW_SERVER = 0;
+    SLICE_GW_CLIENT = 1;
+}
+
+// TcType represents Traffic Control Type.
+enum TcType {
+    BANDWIDTH_CONTROL = 0;
+}
+
+//
+enum ClassType {
+    HTB = 0;
+    TBF = 1;
+}
+
+// Slice QoS Profile 
+message SliceQosProfile {
+    // Name of the slice
+    string sliceName = 1;
+    // Slice Identifier
+    string sliceId = 2;
+    // Name of the QoS profile attached to the slice
+    string qosProfileName = 3;
+    // TC type -  Bandwidth control
+    TcType tcType = 4;
+    // ClassType - HTB   ( HTB)
+    ClassType ClassType = 5;
+    // Bandwidth Ceiling in Mbps  - 5 Mbps (100k - 100 Mbps)
+    uint32 bwCeiling = 6;
+    // Bandwidth Guaranteed -  1 Mbps ( 100k- 100 Mbps)
+    uint32 bwGuaranteed = 7;
+    // Priority - 2 (Number 0-3)
+    uint32 priority = 8;
+    // Dscp class to mark inter cluster traffic
+    string dscpClass = 9;
+}
 
 // AppInterfaceStatus represents Application Pod Interface Status.
 message AppInterfaceStatus {
@@ -111,23 +161,7 @@ message SliceGwConnectionContext {
     repeated AppPodContext appContext = 14;
 }
 
-message SliceGwInterClusterQosProfile {
-    // Name of the slice 
-    string sliceName = 1;
-    // Name of the QoS profile configured for the slice
-    string sliceQosProfile = 2;
-    // Priority of inter cluster traffic configured in the
-    // QoS profile for the slice.
-    // Current range: 0 - 3
-    // Lower value signifies higher priority. A priority value
-    // value of 0 should be given higher priority than a value 
-    // of 3.
-    uint32 interClusterTrafficPriority = 3;
-}
-
 service GwSidecarService {
-    // The Interface to update the ID Token.
-    rpc UpdateIDToken(Token) returns (SidecarResponse) {}
     // The Interface to get the Pod status.
     rpc GetStatus(google.protobuf.Empty) returns (GwPodStatus) {}
     // The Interface to update the connection context. It also adds the route.
