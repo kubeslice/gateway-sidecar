@@ -19,16 +19,9 @@ func bootstrapGwPod(log *logger.Logger) error{
 }
 
 func main(){
-	var logLevel,logPath string
-	logLevel = os.Getenv("LOG_LEVEL")
-	if logLevel == "" {
-		logLevel = "INFO"
-	}
-	if logPath == "" {
-		logPath = "avesha-sidecar.log"
-	}
+
 	//create a new logger module
-	log := logger.NewLogger(logLevel,logPath)
+	log := logger.NewLogger()
 
 	// Get value of a net.ipv4.ip_forward using sysctl
 	val,err := sysctl.Get("net.ipv4.ip_forward")

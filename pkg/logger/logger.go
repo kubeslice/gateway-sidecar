@@ -81,7 +81,13 @@ func (logger *Logger) Panic(args ...interface{}) {
 }
 
 // NewLogger creates the new logger object.
-func NewLogger(logLevel string, logPath string) *Logger {
+func NewLogger() *Logger {
+	logLevel := os.Getenv("LOG_LEVEL")
+	if logLevel == "" {
+		logLevel = "INFO"
+	}
+	logPath := "avesha-sidecar.log"
+	
 	logLevelMap := map[string]zapcore.Level{
 		"DEBUG": zapcore.DebugLevel,
 		"INFO":  zapcore.InfoLevel,
