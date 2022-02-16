@@ -21,13 +21,16 @@ var (
 
 // bootstrapGwPod shall bootstrap the Gateway Pod sidecar service.
 // it creates the required directory structure for openvpn pods
-func bootstrapGwPod(log *logger.Logger) error{
+func bootstrapGwPod(log *logger.Logger,wg *sync.WaitGroup) error{
 	gwPod := bootstrap.NewGatewayPod(os.Getenv("OPEN_VPN_MODE"),os.Getenv("MOUNT_PATH"),os.Getenv("SECRET_MOUNT_PATH"),log)
 
 	if err:= gwPod.Process();err!=nil{
+		log.Errorf("Error bootstraping gw pod",err.Error())
 		return err
 	}
 	//TODO: register status checks
+	wg.Done()
+	log.Info("finished bootstraping gw pod")
 	return nil
 }
 
@@ -65,7 +68,7 @@ func shutdownHandler(wg *sync.WaitGroup) {
 	log.Infof("Teardown started with ", sig, "signal")
 	
 	wg.Done()
-	os.Exit(1)
+	//os.Exit(1)
 }
 
 
@@ -83,17 +86,17 @@ func main(){
 			log.Fatalf("Set of ipv4.ip_forward errored %v", err)
 		}
 	}
-	go bootstrapGwPod(log)
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+
+	go bootstrapGwPod(log,wg)
 
 	// Start the GRPC Server to communicate with slice controller.
 	go startGrpcServer(grpcPort)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
 	go shutdownHandler(wg)
 
 	wg.Wait()
 	log.Infof("Avesha Sidecar exited")
-
 	
 }
