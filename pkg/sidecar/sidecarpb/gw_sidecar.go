@@ -26,7 +26,6 @@ type GwSidecar struct {
 	UnimplementedGwSidecarServiceServer
 }
 
-
 // Stores the node port of the remote cluster.
 // We need this to set the dscp config when the mode of the Gw is of type CLIENT, in
 // which case the remote cluster would be the SERVER and the client is connected to
