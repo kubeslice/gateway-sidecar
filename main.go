@@ -21,7 +21,7 @@ var (
 
 // bootstrapGwPod shall bootstrap the Gateway Pod sidecar service.
 // it creates the required directory structure for openvpn pods
-func bootstrapGwPod(log *logger.Logger,wg *sync.WaitGroup) error{
+func bootstrapGwPod(wg *sync.WaitGroup) error{
 	gwPod := bootstrap.NewGatewayPod(os.Getenv("OPEN_VPN_MODE"),os.Getenv("MOUNT_PATH"),os.Getenv("SECRET_MOUNT_PATH"),log)
 
 	if err:= gwPod.Process();err!=nil{
@@ -89,7 +89,7 @@ func main(){
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 
-	go bootstrapGwPod(log,wg)
+	go bootstrapGwPod(wg)
 
 	// Start the GRPC Server to communicate with slice controller.
 	go startGrpcServer(grpcPort)
