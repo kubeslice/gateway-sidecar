@@ -54,18 +54,6 @@ func (gw *GatewayPod) Process() error {
 			}
 		}
 
-		//create a file named openvpn.conf and copy the contents from source file present at secretMountPath
-		files:= []string{"openvpn.conf"}
-
-		for _,file := range files{
-			sourceFile := gw.secretMountPath + "/" + file
-			destinationFile := gw.mountPath + "/" + file
-			err = CopyFile(sourceFile,destinationFile)
-			if err != nil {
-				return err
-			}
-		}
-
 		// create sub-directories "issued" and "private" in "/mountPath/pki"
 		present,err = exists(gw.mountPath+"/pki/"+"issued")
 		if err != nil {
@@ -88,36 +76,31 @@ func (gw *GatewayPod) Process() error {
 				return err
 			}
 		}
-		//TODO:Discuss on the last fileName
-		//Copy these 3 files from /secretMountPath to /mountPath/pki/
-		files = []string{"ca.crt","dh.pem",baseFileName+"-ta"+".key"}
-		for _,file := range files{
-			sourceFile := gw.secretMountPath + "/" + file
-			destinationFile := gw.mountPath + "/pki/" + file
+		//Copy these files from /secretMountPath/* to /mountPath/*
+		openVpnConfFileName := "openvpn.conf"
+		crtFileName := baseFileName + ".crt"
+		keyFileName := baseFileName + ".key"
+		ccdFileName := "slice-" + os.Getenv("SLICE_NAME")
+		files := map[string]string{
+			"ovpnConfigFile": openVpnConfFileName,
+			"pkiCACertFile":"pki/" + "ca.crt",
+			"pkiDhPemFile":"pki/" + "dh.pem",
+			"pkiTAKeyFile": "pki/" + baseFileName +"-ta.key",
+			"pkiIssuedCertFile": "pki/issued/" + crtFileName,
+			"pkiPrivateKeyFile": "pki/private/" + keyFileName,
+			"ccdFile" : "ccd/" + ccdFileName,
+		}
+		for source,dest := range files{
+			sourceFile := gw.secretMountPath + "/" + source
+			destinationFile := gw.mountPath +"/" + dest
 			err = CopyFile(sourceFile,destinationFile)
 			if err != nil {
 				return err
 			}
 		}
 
-		//copy the .crt file in /mountPath/pki/issued
-		crtFileName := baseFileName + ".crt"
-		sourceFile := gw.secretMountPath + "/" + crtFileName
-		destinationFile := gw.mountPath + "/pki/issued/" + crtFileName
-		err = CopyFile(sourceFile,destinationFile)
-		if err != nil {
-			return err
-		}
-
-		//copy the .crt file in /mountPath/pki/private
-		keyFileName := baseFileName + ".key"
-		sourceFile = gw.secretMountPath + "/" + keyFileName
-		destinationFile = gw.mountPath + "/pki/private/" + keyFileName
-		err = CopyFile(sourceFile,destinationFile)
-		if err != nil {
-			return err
-		}
-		//TODO: copy file in /ccd directory
+	}else {
+		//Mount files for client
 	}
 	return nil
 }
