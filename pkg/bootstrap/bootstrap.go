@@ -1,7 +1,7 @@
 package bootstrap
 
 import (
-	"io"
+	"io/ioutil"
 	"os"
 	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/logger"
 )
@@ -116,42 +116,14 @@ func exists(path string) (bool,error) {
 	return false,err
 }
 func CopyFile(source string, dest string) (error) {
-	var sourcefile,destfile *os.File
-	var err error
+	bytesRead, err := ioutil.ReadFile(source)
+	if err != nil {
+		return err
+    }
 
-	sourcefile, err = os.Open(source)
+    err = ioutil.WriteFile(dest, bytesRead, 0755)
 	if err != nil {
 		return err
 	}
-
-	defer sourcefile.Close()
-
-	//check if the destination file already exists , if not create it
-	present,err := exists(dest)
-	if err != nil {
-		return err
-	}
-	if !present{
-		destfile, err := os.Create(dest)
-		if err != nil {
-			return err
-		}
-		defer destfile.Close()
-	} else {
-		destfile ,err := os.Open(dest)
-		if err != nil {
-			return err
-		}
-		defer destfile.Close()
-	}
-	
-	_, err = io.Copy(destfile, sourcefile)
-	if err == nil {
-		sourceinfo, err := os.Stat(source)
-		if err != nil {
-			_ = os.Chmod(dest, sourceinfo.Mode())
-		}
-
-	}
-	return nil
+	return err
 } 
