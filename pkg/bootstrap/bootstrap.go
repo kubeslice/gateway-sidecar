@@ -29,7 +29,7 @@ func NewGatewayPod(mode string,mountPath,secretMountPath string ,logger *logger.
 
 // Process() creates a directory structure as required by openvpn pods
 func (gw *GatewayPod) Process() error {
-	baseFileName := os.Getenv("CLUSTER_ID") +"-" +  os.Getenv("SLICE_NAME")
+	baseFileName := os.Getenv("CLUSTER_ID") +"-" +  os.Getenv("SLICE_NAME") + "-1.vpn.aveshasystems.com"
 	if gw.mode == SERVER {
 		//create two directories named pki and ccd in /mountPath (eg: /config/pki) if not exists
 		present,err := exists(gw.mountPath+"/pki")
@@ -80,12 +80,13 @@ func (gw *GatewayPod) Process() error {
 		openVpnConfFileName := "openvpn.conf"
 		crtFileName := baseFileName + ".crt"
 		keyFileName := baseFileName + ".key"
+		takeyFileName := baseFileName + "-ta.key"
 		ccdFileName := "slice-" + os.Getenv("SLICE_NAME")
 		files := map[string]string{
 			"ovpnConfigFile": openVpnConfFileName,
 			"pkiCACertFile":"pki/" + "ca.crt",
 			"pkiDhPemFile":"pki/" + "dh.pem",
-			"pkiTAKeyFile": "pki/" + baseFileName +"-ta.key",
+			"pkiTAKeyFile": "pki/" + takeyFileName,
 			"pkiIssuedCertFile": "pki/issued/" + crtFileName,
 			"pkiPrivateKeyFile": "pki/private/" + keyFileName,
 			"ccdFile" : "ccd/" + ccdFileName,
