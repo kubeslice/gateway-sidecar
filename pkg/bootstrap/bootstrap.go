@@ -98,6 +98,12 @@ func (gw *GatewayPod) Process() error {
 				return err
 			}
 		}
+		//create the ovpn_env.sh file in /config directory
+
+		err = writeFile("config/ovpn_env.sh")
+		if err != nil {
+			return err
+		}
 
 	}else {
 		//Mount files for client
@@ -126,4 +132,26 @@ func CopyFile(source string, dest string) (error) {
 		return err
 	}
 	return err
-} 
+}
+
+func writeFile(source string) error {
+	f, err := os.Create(source)
+
+    if err != nil {
+        return err
+    }
+
+	contents := `declare -x OVPN_DEFROUTE=0
+declare -x OVPN_DEVICE=tun
+declare -x OVPN_NAT=0`
+	_, err = f.WriteString(contents)
+
+    if err != nil {
+        return err
+    }
+
+    defer f.Close()
+
+	return err
+
+}
