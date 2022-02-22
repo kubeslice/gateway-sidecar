@@ -16,11 +16,11 @@ Avesha Slice Gateway sidecar related routines
 package sidecar
 
 import (
+	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/logger"
 	"fmt"
-	"os"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/logger"	
+	"os"
 )
 
 var (

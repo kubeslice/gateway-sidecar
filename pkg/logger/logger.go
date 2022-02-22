@@ -87,7 +87,7 @@ func NewLogger() *Logger {
 		logLevel = "INFO"
 	}
 	logPath := "avesha-sidecar.log"
-	
+
 	logLevelMap := map[string]zapcore.Level{
 		"DEBUG": zapcore.DebugLevel,
 		"INFO":  zapcore.InfoLevel,

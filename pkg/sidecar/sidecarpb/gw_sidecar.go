@@ -1,4 +1,3 @@
-
 //gw_sidecar.go
 
 // Avesha LLC
@@ -8,18 +7,17 @@
 //
 // Module: Avesha Sidecar - Slice Controller Commnunication GRPC Module
 
-
 // GwSidecar represents the GRPC Gateway sidecar
 
 package sidecar
 
-import(
-	"net"
+import (
 	"context"
-	"github.com/vishvananda/netlink"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/vishvananda/netlink"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"net"
 )
 
 type GwSidecar struct {
@@ -52,7 +50,7 @@ func (s *GwSidecar) GetStatus(ctx context.Context, in *empty.Empty) (*GwPodStatu
 	return podStatus, err
 }
 
-func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *SliceGwConnectionContext) (*SidecarResponse, error){
+func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *SliceGwConnectionContext) (*SidecarResponse, error) {
 	if ctx.Err() == context.Canceled {
 		return nil, status.Errorf(codes.Canceled, "Client cancelled, abandoning.")
 	}
@@ -102,10 +100,10 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 	}
 	log.Infof("Connection Context Updated Successfully")
 
-	return &SidecarResponse{StatusMsg: "Connection Context Updated Successfully"},nil
+	return &SidecarResponse{StatusMsg: "Connection Context Updated Successfully"}, nil
 }
 
-func (s *GwSidecar) UpdateSliceQosProfile(ctx context.Context, qosProfile *SliceQosProfile) (*SidecarResponse, error){
+func (s *GwSidecar) UpdateSliceQosProfile(ctx context.Context, qosProfile *SliceQosProfile) (*SidecarResponse, error) {
 	if ctx.Err() == context.Canceled {
 		return nil, status.Errorf(codes.Canceled, "Client canceled, ignoring qos update message.")
 	}

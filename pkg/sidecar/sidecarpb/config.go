@@ -1,6 +1,5 @@
 package sidecar
 
-
 // classType - Type of the Class
 type classType string
 
