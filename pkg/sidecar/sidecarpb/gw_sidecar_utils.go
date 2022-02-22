@@ -1,21 +1,21 @@
 package sidecar
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
+	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/nettools"
 	"bytes"
 	"errors"
-	"strings"
+	"fmt"
 	"github.com/google/shlex"
-	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/nettools"
+	"os"
+	"os/exec"
+	"strings"
 )
 
 const (
 	nsmInterfaceName string = "nsm0"
 )
 
-func getGwPodStatus() (*GwPodStatus,error) {
+func getGwPodStatus() (*GwPodStatus, error) {
 	podStatus := &GwPodStatus{}
 
 	podStatus.GatewayPodIP = nettools.GetPodIP()
@@ -33,8 +33,8 @@ func getGwPodStatus() (*GwPodStatus,error) {
 	podStatus.NsmIntfStatus = &nsmIntfStatus
 
 	//TODO:remaining part - tunnelStatus
-	
-	return podStatus,nil
+
+	return podStatus, nil
 
 }
 
