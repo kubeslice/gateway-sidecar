@@ -7,5 +7,5 @@ fmt: ##run go fmt
 	go fmt ./...
 
 .PHONY: build
-build: ## build the source code
+build: fmt
 	go build main.go
