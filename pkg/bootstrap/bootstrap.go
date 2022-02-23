@@ -135,7 +135,7 @@ func CopyFile(source string, dest string, perm fs.FileMode) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(dest, bytesRead, 0755)
+	err = ioutil.WriteFile(dest, bytesRead, perm)
 	if err != nil {
 		return err
 	}
