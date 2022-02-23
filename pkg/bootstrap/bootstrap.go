@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/logger"
+	"io/fs"
 	"io/ioutil"
 	"os"
 )
@@ -29,6 +30,7 @@ func NewGatewayPod(mode string, mountPath, secretMountPath string, logger *logge
 
 // Process() creates a directory structure as required by openvpn pods
 func (gw *GatewayPod) Process() error {
+	var perm fs.FileMode
 	baseFileName := os.Getenv("CLUSTER_ID") + "-" + os.Getenv("SLICE_NAME") + "-1.vpn.aveshasystems.com"
 	if gw.mode == SERVER {
 		//create two directories named pki and ccd in /mountPath (eg: /config/pki) if not exists
@@ -94,7 +96,12 @@ func (gw *GatewayPod) Process() error {
 		for source, dest := range files {
 			sourceFile := gw.secretMountPath + "/" + source
 			destinationFile := gw.mountPath + "/" + dest
-			err = CopyFile(sourceFile, destinationFile)
+			if source == "pkiIssuedCertFile" || source == "pkiPrivateKeyFile" {
+				perm = 0600
+			} else {
+				perm = 0644
+			}
+			err = CopyFile(sourceFile, destinationFile, perm)
 			if err != nil {
 				return err
 			}
@@ -122,7 +129,7 @@ func exists(path string) (bool, error) {
 	}
 	return false, err
 }
-func CopyFile(source string, dest string) error {
+func CopyFile(source string, dest string, perm fs.FileMode) error {
 	bytesRead, err := ioutil.ReadFile(source)
 	if err != nil {
 		return err
