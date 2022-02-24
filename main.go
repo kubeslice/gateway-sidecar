@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	SECRET_MOUNT_PATH = "/var/run/vpn"
+	SECRET_MOUNT_PATH = "/var/run/vpn/"
 )
 
 var (

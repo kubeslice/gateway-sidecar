@@ -2,9 +2,8 @@ package bootstrap
 
 import (
 	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/logger"
-	"io/fs"
-	"io/ioutil"
 	"os"
+	"os/exec"
 )
 
 const (
@@ -30,83 +29,16 @@ func NewGatewayPod(mode string, mountPath, secretMountPath string, logger *logge
 
 // Process() creates a directory structure as required by openvpn pods
 func (gw *GatewayPod) Process() error {
-	var perm fs.FileMode
-	baseFileName := os.Getenv("CLUSTER_ID") + "-" + os.Getenv("SLICE_NAME") + "-1.vpn.aveshasystems.com"
 	if gw.mode == SERVER {
-		//create two directories named pki and ccd in /mountPath (eg: /config/pki) if not exists
-		present, err := exists(gw.mountPath + "/pki")
+		//copy the files from /var/run/vpn/. to /config/
+		source := gw.secretMountPath + "."
+		dest := "config/"
+		cmd := exec.Command("cp", "-R", source, dest)
+		stdout, err := cmd.Output()
 		if err != nil {
 			return err
 		}
-		if !present {
-			err = os.Mkdir(gw.mountPath+"/pki", 0755)
-			if err != nil {
-				return err
-			}
-		}
-
-		present, err = exists(gw.mountPath + "/ccd")
-		if err != nil {
-			return err
-		}
-		if !present {
-			err = os.Mkdir(gw.mountPath+"/ccd", 0755)
-			if err != nil {
-				return err
-			}
-		}
-
-		// create sub-directories "issued" and "private" in "/mountPath/pki"
-		present, err = exists(gw.mountPath + "/pki/" + "issued")
-		if err != nil {
-			return err
-		}
-		if !present {
-			err = os.Mkdir(gw.mountPath+"/pki/"+"issued", 0755)
-			if err != nil {
-				return err
-			}
-		}
-
-		present, err = exists(gw.mountPath + "/pki/" + "private")
-		if err != nil {
-			return err
-		}
-		if !present {
-			err = os.Mkdir(gw.mountPath+"/pki/"+"private", 0755)
-			if err != nil {
-				return err
-			}
-		}
-		//Copy these files from /secretMountPath/* to /mountPath/*
-		openVpnConfFileName := "openvpn.conf"
-		crtFileName := baseFileName + ".crt"
-		keyFileName := baseFileName + ".key"
-		takeyFileName := baseFileName + "-ta.key"
-		ccdFileName := "slice-" + os.Getenv("SLICE_NAME")
-		files := map[string]string{
-			"ovpnConfigFile":    openVpnConfFileName,
-			"pkiCACertFile":     "pki/" + "ca.crt",
-			"pkiDhPemFile":      "pki/" + "dh.pem",
-			"pkiTAKeyFile":      "pki/" + takeyFileName,
-			"pkiIssuedCertFile": "pki/issued/" + crtFileName,
-			"pkiPrivateKeyFile": "pki/private/" + keyFileName,
-			"ccdFile":           "ccd/" + ccdFileName,
-		}
-		for source, dest := range files {
-			sourceFile := gw.secretMountPath + "/" + source
-			destinationFile := gw.mountPath + "/" + dest
-			if source == "pkiIssuedCertFile" || source == "pkiPrivateKeyFile" {
-				perm = 0600
-			} else {
-				perm = 0644
-			}
-			err = CopyFile(sourceFile, destinationFile, perm)
-			if err != nil {
-				return err
-			}
-		}
-		//create the ovpn_env.sh file in /config directory
+		gw.logger.Info(string(stdout))
 
 		err = writeFile("config/ovpn_env.sh")
 		if err != nil {
@@ -119,32 +51,8 @@ func (gw *GatewayPod) Process() error {
 	return nil
 }
 
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}
-func CopyFile(source string, dest string, perm fs.FileMode) error {
-	bytesRead, err := ioutil.ReadFile(source)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(dest, bytesRead, perm)
-	if err != nil {
-		return err
-	}
-	return err
-}
-
 func writeFile(source string) error {
 	f, err := os.Create(source)
-
 	if err != nil {
 		return err
 	}
@@ -152,14 +60,11 @@ func writeFile(source string) error {
 	contents := `declare -x OVPN_DEFROUTE=0
 declare -x OVPN_DEVICE=tun
 declare -x OVPN_NAT=0`
-	_, err = f.WriteString(contents)
 
+	_, err = f.WriteString(contents)
 	if err != nil {
 		return err
 	}
-
 	defer f.Close()
-
 	return err
-
 }
