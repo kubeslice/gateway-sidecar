@@ -2,6 +2,7 @@ package sidecar
 
 import (
 	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/nettools"
+	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/status"
 	"bytes"
 	"errors"
 	"fmt"
@@ -15,9 +16,16 @@ const (
 	nsmInterfaceName string = "nsm0"
 )
 
+var (
+	statusMonitor *status.Monitor
+)
+
+func SetStatusMonitor(sm *status.Monitor) {
+	statusMonitor = sm
+}
+
 func getGwPodStatus() (*GwPodStatus, error) {
 	podStatus := &GwPodStatus{}
-
 	podStatus.GatewayPodIP = nettools.GetPodIP()
 	podStatus.NodeIP = os.Getenv("NODE_IP")
 	podNsmIP, err := nettools.GetInterfaceIP(nsmInterfaceName)
@@ -32,10 +40,27 @@ func getGwPodStatus() (*GwPodStatus, error) {
 
 	podStatus.NsmIntfStatus = &nsmIntfStatus
 
-	//TODO:remaining part - tunnelStatus
-
+	if statusMonitor != nil {
+		// Get the monitor status checks
+		checks := statusMonitor.Checks()
+		for _, v := range checks {
+			stats, err := v.Status()
+			if err != nil {
+				continue
+			}
+			tunStat := *stats.(*status.TunnelInterfaceStatus)
+			tunnelStatus := TunnelInterfaceStatus{
+				NetInterface: tunStat.NetInterface,
+				LocalIP:      tunStat.LocalIP,
+				PeerIP:       tunStat.PeerIP,
+				Latency:      tunStat.Latency,
+				TxRate:       tunStat.TxRate,
+				RxRate:       tunStat.RxRate,
+			}
+			podStatus.TunnelStatus = &tunnelStatus
+		}
+	}
 	return podStatus, nil
-
 }
 
 // runCommand runs the command string
@@ -98,4 +123,23 @@ func runTcCommand(tcCmd string) (string, error) {
 		}
 	}
 	return cmdOut, errVal
+}
+
+func updateGwStatusWithConContext(conContext *SliceGwConnectionContext) error {
+	log.Infof("conContext : %v", conContext)
+	var errVal error = nil
+
+	for k, v := range statusMonitor.Checks() {
+		switch k {
+		case "TunnelCheck":
+			if conContext.GetRemoteSliceGwVpnIP() == "" {
+				errVal = errors.New("invalid Remote Slice Gateway VPN IP")
+			} else {
+				if err := v.(*status.TunnelChecker).UpdatePeerIP(conContext.GetRemoteSliceGwVpnIP()); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return errVal
 }

@@ -61,8 +61,10 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid Remote Slice Gateway VPN IP")
 	}
 	log.Infof("conContext : %v", conContext)
-	// TODO:Update the PeerIP and start Ping Check
-
+	err := updateGwStatusWithConContext(conContext)
+	if err != nil {
+		return nil, status.Errorf(codes.FailedPrecondition, "Failed to update the Connection context,tunnel is not up yet!")
+	}
 	if conContext.GetRemoteSliceGwNsmSubnet() == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid Remote Slice Gateway Subnet")
 	}
@@ -126,9 +128,6 @@ func (s *GwSidecar) UpdateSliceQosProfile(ctx context.Context, qosProfile *Slice
 		//settings.Log.Errorf("Failed to enforce QoS policy: %v", err)
 		return nil, status.Errorf(codes.Internal, "Failed to enforce QoS policy: %v", err)
 	}
-
 	log.Infof("Slice QoS policy enforced successfully")
-
 	return &SidecarResponse{StatusMsg: "Slice QoS policy enforced successfully"}, nil
-
 }
