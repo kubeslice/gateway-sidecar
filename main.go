@@ -1,17 +1,21 @@
 package main
 
 import (
-	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/bootstrap"
-	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/logger"
-	sidecar "bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/sidecar/sidecarpb"
 	"fmt"
-	"github.com/lorenzosaino/go-sysctl"
-	"google.golang.org/grpc"
 	"net"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
+
+	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/bootstrap"
+	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/logger"
+	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/metrics"
+	sidecar "bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/sidecar/sidecarpb"
+	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/status"
+	"github.com/lorenzosaino/go-sysctl"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -25,13 +29,25 @@ var (
 // bootstrapGwPod shall bootstrap the Gateway Pod sidecar service.
 // it creates the required directory structure for openvpn pods
 func bootstrapGwPod(wg *sync.WaitGroup) error {
+	var tunCheck *status.TunnelChecker
 	gwPod := bootstrap.NewGatewayPod(os.Getenv("OPEN_VPN_MODE"), os.Getenv("MOUNT_PATH"), SECRET_MOUNT_PATH, log)
-
 	if err := gwPod.Process(); err != nil {
 		log.Errorf("Error bootstraping gw pod", err.Error())
 		return err
 	}
-	//TODO: register status checks
+
+	statusMonitor := status.NewMonitor(log)
+	tunCheck = status.NewTunnelChecker(log).(*status.TunnelChecker)
+	mod, err := statusMonitor.RegisterCheck(&status.Config{
+		Name:     "TunnelCheck",
+		Checker:  tunCheck,
+		Interval: time.Second * 6,
+	})
+	if err != nil {
+		log.Fatalf("Registering Tunnel check failed with Error : %v", err)
+	}
+	sidecar.SetStatusMonitor(statusMonitor)
+	tunCheck.UpdateExecModule(mod)
 	wg.Done()
 	log.Info("finished bootstraping gw pod")
 	return nil
@@ -76,6 +92,7 @@ func shutdownHandler(wg *sync.WaitGroup) {
 
 func main() {
 	var grpcPort string = "5000"
+	var metricCollectorPort string = "18080"
 	// Get value of a net.ipv4.ip_forward using sysctl
 	val, err := sysctl.Get("net.ipv4.ip_forward")
 	if err != nil {
@@ -95,6 +112,8 @@ func main() {
 
 	// Start the GRPC Server to communicate with slice controller.
 	go startGrpcServer(grpcPort)
+
+	go metrics.StartMetricsCollector(metricCollectorPort)
 
 	go shutdownHandler(wg)
 
