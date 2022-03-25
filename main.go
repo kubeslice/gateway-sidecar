@@ -118,6 +118,6 @@ func main() {
 	go shutdownHandler(wg)
 
 	wg.Wait()
-	log.Infof("Avesha Sidecar exited")
+	log.Infof("Gateway Sidecar exited")
 
 }

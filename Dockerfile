@@ -2,8 +2,6 @@ ARG PLATFORM
 
 FROM ${PLATFORM}/golang:1.17.7-alpine3.15 as gobuilder
 
-LABEL maintainer="Avesha Systems LLC"
-
 # Install git.
 
 # Git is required for fetching the dependencies.
