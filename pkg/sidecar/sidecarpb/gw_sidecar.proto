@@ -10,14 +10,6 @@ message SidecarResponse {
     string statusMsg = 1;
 }
 
-// Status of the Pod.
-enum Status {
-  POD_INITIALIZING = 0;
-  POD_HEALTHY = 1;
-  POD_UNHEALTHY = 2;
-  POD_INVALID_TOKEN = 3;
-}
-
 // slice gateway-host-type
 enum SliceGwHostType {
     SLICE_GW_SERVER = 0;
@@ -57,22 +49,6 @@ message SliceQosProfile {
     string dscpClass = 9;
 }
 
-// AppInterfaceStatus represents Application Pod Interface Status.
-message AppInterfaceStatus {
-    // Pod Name
-	string podName      = 1;
-    // NSM Interface
-	string nsmInterface = 2;
-    // NSM IP
-	string nsmIP        = 3;
-    // Pod IP
-	string podIP        = 4;
-    // Gateway NSM Interface
-	string nsmGwInterface = 5;
-    // NSM IP
-	string nsmGwIP        = 6;
-}
-
 // TunnelInterfaceStatus represents Tunnel Interface Status.
 message TunnelInterfaceStatus  {
     // Net Interface
@@ -103,31 +79,12 @@ message GwPodStatus {
     string nodeIP                         = 1;
     // Gateway Pod IP.
     string gatewayPodIP                   = 2;
-    // Pod Status
-    Status podStatus                      = 3;
     // The Tunnel Interface Status.
     TunnelInterfaceStatus tunnelStatus    = 4;
     // NSM Interface Status
     NsmInterfaceStatus  nsmIntfStatus     = 5;
-    // Application Pod Interface status
-    repeated AppInterfaceStatus appStatus = 6;
 }
 
-// AppPodContext represents Application Pod Context format.
-message AppPodContext {
-    // Pod Name
-	string podName      = 1;
-    // NSM Interface
-	string nsmInterface = 2;
-    // NSM IP
-	string nsmIP        = 3;
-    // Pod IP
-	string podIP        = 4;
-    // NSM GW peer IP
-	string nsmGwPeerIP  = 5;
-    // Namespace
-	string namespace    = 6;
-}
 
 // SliceGwConnectionContext - Slice Gateway Connection Context.
 message SliceGwConnectionContext {
@@ -157,8 +114,6 @@ message SliceGwConnectionContext {
     string remoteSliceGwNodeIP = 12;
     // Remote slice gateway Node Port
     string remoteSliceGwNodePort = 13;
-    // Application Pod Context
-    repeated AppPodContext appContext = 14;
 }
 
 service GwSidecarService {

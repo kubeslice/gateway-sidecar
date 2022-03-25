@@ -50,3 +50,4 @@ Thumbs.db
 
 # vscode cached files
 .vscode/
+bin/
