@@ -45,8 +45,6 @@ func (gw *GatewayPod) Process() error {
 			return err
 		}
 
-	} else {
-		//Mount files for client
 	}
 	return nil
 }
