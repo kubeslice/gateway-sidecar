@@ -1,1 +1,1 @@
-# gw-sidecar
+# gateway-sidecar
