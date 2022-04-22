@@ -1,1 +1,1 @@
-# kubeslice-gw-sidecar
+# gw-sidecar
