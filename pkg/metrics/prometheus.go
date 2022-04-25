@@ -24,7 +24,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/logger"
+	"github.com/kubeslice/gateway-sidecar/pkg/logger"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )

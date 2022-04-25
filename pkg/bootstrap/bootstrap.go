@@ -21,7 +21,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/logger"
+	"github.com/kubeslice/gateway-sidecar/pkg/logger"
 )
 
 const (

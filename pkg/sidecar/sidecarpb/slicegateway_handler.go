@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/logger"
+	"github.com/kubeslice/gateway-sidecar/pkg/logger"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

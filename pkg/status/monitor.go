@@ -20,8 +20,8 @@ package status
 import (
 	"sync"
 
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/exec"
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/logger"
+	"github.com/kubeslice/gateway-sidecar/pkg/exec"
+	"github.com/kubeslice/gateway-sidecar/pkg/logger"
 	"github.com/pkg/errors"
 )
 

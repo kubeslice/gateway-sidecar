@@ -25,9 +25,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/nettools"
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/status"
 	"github.com/google/shlex"
+	"github.com/kubeslice/gateway-sidecar/pkg/nettools"
+	"github.com/kubeslice/gateway-sidecar/pkg/status"
 )
 
 const (

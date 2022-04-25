@@ -26,11 +26,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/bootstrap"
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/logger"
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/metrics"
-	sidecar "github.com/aveshasystems/kubeslice-gw-sidecar/pkg/sidecar/sidecarpb"
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/status"
+	"github.com/kubeslice/gateway-sidecar/pkg/bootstrap"
+	"github.com/kubeslice/gateway-sidecar/pkg/logger"
+	"github.com/kubeslice/gateway-sidecar/pkg/metrics"
+	sidecar "github.com/kubeslice/gateway-sidecar/pkg/sidecar/sidecarpb"
+	"github.com/kubeslice/gateway-sidecar/pkg/status"
 	"github.com/lorenzosaino/go-sysctl"
 	"google.golang.org/grpc"
 )

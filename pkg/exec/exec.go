@@ -20,7 +20,7 @@ package exec
 import (
 	"time"
 
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/logger"
+	"github.com/kubeslice/gateway-sidecar/pkg/logger"
 )
 
 // RunFunc of function type

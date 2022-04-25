@@ -23,12 +23,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/cmd"
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/exec"
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/logger"
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/metrics"
-	"github.com/aveshasystems/kubeslice-gw-sidecar/pkg/nettools"
 	"github.com/go-ping/ping"
+	"github.com/kubeslice/gateway-sidecar/pkg/cmd"
+	"github.com/kubeslice/gateway-sidecar/pkg/exec"
+	"github.com/kubeslice/gateway-sidecar/pkg/logger"
+	"github.com/kubeslice/gateway-sidecar/pkg/metrics"
+	"github.com/kubeslice/gateway-sidecar/pkg/nettools"
 	"github.com/pkg/errors"
 )
 

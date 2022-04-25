@@ -1,4 +1,4 @@
-module github.com/aveshasystems/kubeslice-gw-sidecar
+module github.com/kubeslice/gateway-sidecar
 
 go 1.17
 
