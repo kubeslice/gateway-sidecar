@@ -36,8 +36,8 @@ COPY . .
 # Build the binary.
 
 RUN go mod download &&\
-    go env -w GOPRIVATE=bitbucket.org/realtimeai && \
-    CGO_ENABLED=1 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/avesha-kubeslice-gw-sidecar main.go
+    go env -w GOPRIVATE=github.com/kubeslice && \
+    CGO_ENABLED=1 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/gw-sidecar main.go
 
 
 # Build reduced image from base alpine
@@ -51,7 +51,7 @@ RUN apk add --no-cache ca-certificates \
 
 # Copy our static executable.
 
-COPY --from=gobuilder bin/avesha-kubeslice-gw-sidecar .
+COPY --from=gobuilder bin/gw-sidecar .
 
 EXPOSE 5000
 
@@ -59,4 +59,4 @@ EXPOSE 8080
 
 # Or could be CMD
 
-ENTRYPOINT ["./avesha-kubeslice-gw-sidecar"]
+ENTRYPOINT ["./gw-sidecar"]
