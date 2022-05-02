@@ -1,5 +1,7 @@
 # gateway-sidecar
 
+gateway-sidecar usages kubernetes sidecar pattern, for establishing connection between 2 clusters using OpenVPN pods.
+
 ## Getting Started
 
 It is strongly recommended to use a released version.
