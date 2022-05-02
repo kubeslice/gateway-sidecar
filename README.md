@@ -22,3 +22,7 @@ To install:
   git clone https://github.com/kubeslice/gateway-sidecar.git
   cd gateway-sidecar
 ```
+
+## License
+
+This project is released under the Apache 2.0 License.
