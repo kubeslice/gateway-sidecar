@@ -1,6 +1,6 @@
 # gateway-sidecar
 
-gateway-sidecar usages kubernetes sidecar pattern, for establishing connection between 2 clusters using OpenVPN pods.
+The Slice VPN Gateway is a slice network service component that provides a secure VPN tunnel between any two clusters that are a part of the slice. 
 
 ## Getting Started
 
@@ -12,15 +12,13 @@ It is strongly recommended to use a released version.
 * A running [`kind`](https://kind.sigs.k8s.io/) or [`Docker Desktop Kubernetes`](https://docs.docker.com/desktop/kubernetes/)
   cluster 
 * [`kubectl`](https://kubernetes.io/docs/tasks/tools/) installed and configured
+* Install the [`operator`](https://github.com/kubeslice/operator)
 
-### Installation
-To install: 
-
-1. Clone the latest version of gateway-sidecar from  the `master` branch.
+### Usages
+You can view the sidecar container by describing the gateway pod: 
 
 ```bash
-  git clone https://github.com/kubeslice/gateway-sidecar.git
-  cd gateway-sidecar
+kubectl describe pod <gateway pod name> -n kubeslice-system
 ```
 
 ## License
