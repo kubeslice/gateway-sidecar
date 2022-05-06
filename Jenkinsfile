@@ -1,7 +1,7 @@
-@Library('jenkins-library@master') _
+@Library('jenkins-library@opensource') _
 dockerImagePipeline(
   script: this,
-  service: 'kubeslice/gw-sidecar',
+  service: 'aveshasystems/gw-sidecar',
   dockerfile: 'Dockerfile',
   buildContext: '.',
   buildArguments: [PLATFORM:"amd64"]
