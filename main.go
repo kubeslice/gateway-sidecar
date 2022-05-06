@@ -1,3 +1,20 @@
+/*  Copyright (c) 2022 Avesha, Inc. All rights reserved.
+ *
+ *  SPDX-License-Identifier: Apache-2.0
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package main
 
 import (
@@ -9,11 +26,11 @@ import (
 	"syscall"
 	"time"
 
-	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/bootstrap"
-	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/logger"
-	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/metrics"
-	sidecar "bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/sidecar/sidecarpb"
-	"bitbucket.org/realtimeai/kubeslice-gw-sidecar/pkg/status"
+	"github.com/kubeslice/gateway-sidecar/pkg/bootstrap"
+	"github.com/kubeslice/gateway-sidecar/pkg/logger"
+	"github.com/kubeslice/gateway-sidecar/pkg/metrics"
+	sidecar "github.com/kubeslice/gateway-sidecar/pkg/sidecar/sidecarpb"
+	"github.com/kubeslice/gateway-sidecar/pkg/status"
 	"github.com/lorenzosaino/go-sysctl"
 	"google.golang.org/grpc"
 )
