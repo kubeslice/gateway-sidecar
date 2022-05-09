@@ -18,7 +18,7 @@ It is strongly recommended to use a released version.
 
 ```bash
 git clone https://github.com/kubeslice/gateway-sidecar.git
-cd netops
+cd gateway-sidecar
 make docker-build
 make docker-push
 ```
