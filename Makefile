@@ -12,8 +12,8 @@ build: fmt
 
 .PHONY: docker-build
 docker-build: build
-	docker build -t kubeslice-gw-sidecar:latest-release --build-arg PLATFORM=amd64 . && docker tag kubeslice-gw-sidecar:latest-release nexus.dev.aveshalabs.io/kubeslice-gw-sidecar:latest-stable
+	docker build -t kubeslice-gw-sidecar:latest-release --build-arg PLATFORM=amd64 . && docker tag kubeslice-gw-sidecar:latest-release docker.io/aveshasystems/kubeslice-gw-sidecar:latest-stable
 
 .PHONY: docker-push
 docker-push:
-	docker push nexus.dev.aveshalabs.io/kubeslice-gw-sidecar:latest-stable
+	docker push docker.io/aveshasystems/kubeslice-gw-sidecar:latest-stable
