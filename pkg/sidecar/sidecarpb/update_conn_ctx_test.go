@@ -133,8 +133,6 @@ func TestUpdateConnCtx(t *testing.T) {
 
 			response, err := client.UpdateConnectionContext(ctx, &request)
 
-			fmt.Println(response, "------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.")
-
 			if response != nil {
 				if response.StatusMsg != tt.res.StatusMsg {
 					t.Error("response: expected", tt.res, "received", response)
