@@ -20,8 +20,8 @@ It is strongly recommended to use a released version.
 git clone https://github.com/kubeslice/gateway-sidecar.git
 cd gateway-sidecar
 make docker-build
-make docker-push
 ```
+
 ### Deploying in kind
 For local development use the below command to load the docker image into kind cluster
 
