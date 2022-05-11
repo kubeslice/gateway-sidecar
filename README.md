@@ -22,6 +22,12 @@ cd gateway-sidecar
 make docker-build
 make docker-push
 ```
+### Deploying in kind
+For local development use the below command to load the docker image into kind cluster
+
+```bash
+kind load docker-image <imagename>:<tag> --name <clustername>
+```
 
 ### Usages
 You can view the sidecar container by describing the gateway pod: 
