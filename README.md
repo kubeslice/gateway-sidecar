@@ -22,14 +22,14 @@ cd gateway-sidecar
 make docker-build
 ```
 
-### Deploying in kind
-For local development use the below command to load the docker image into kind cluster
+### Running locally on Kind
+Load the docker image into kind cluster
 
 ```bash
-kind load docker-image <imagename>:<tag> --name <clustername>
+kind load docker-image my-custom-image:unique-tag --name clustername
 ```
 
-### Usages
+### Verification
 You can view the sidecar container by describing the gateway pod: 
 
 ```bash
@@ -37,4 +37,4 @@ kubectl describe pod <gateway pod name> -n kubeslice-system
 ```
 
 ## License
-This project is released under the Apache 2.0 License.
+Apache 2.0 License.
