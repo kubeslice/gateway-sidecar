@@ -4,6 +4,7 @@ The Slice VPN Gateway is a slice network service component that provides a secur
 
 ## Getting Started
 
+[TBD: Add link to getting started] 
 It is strongly recommended to use a released version.
 
 ### Prerequisites
