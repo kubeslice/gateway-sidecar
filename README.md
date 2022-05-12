@@ -14,6 +14,24 @@ It is strongly recommended to use a released version.
 * [`kubectl`](https://kubernetes.io/docs/tasks/tools/) installed and configured
 * Install the [`operator`](https://github.com/kubeslice/operator)
 
+# Local build and update 
+
+## Latest docker image
+[TBD link to docker hub]
+
+## Setting up your helm repo
+
+If you have not added avesha helm repo yet, add it
+
+```console
+helm repo add avesha https://kubeslice.github.io/charts/
+```
+
+upgrade the avesha helm repo
+
+```console
+helm repo update
+
 ### Build docker images
 
 ```bash
@@ -23,7 +41,7 @@ make docker-build
 ```
 
 ### Running locally on Kind
-Load the docker image into kind cluster
+You can load the gateway-sidecar docker image into kind cluster
 
 ```bash
 kind load docker-image my-custom-image:unique-tag --name clustername
