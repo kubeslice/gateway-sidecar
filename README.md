@@ -83,7 +83,7 @@ docker exec -it kind-control-plane crictl images
 Update chart values file `yourvaluesfile.yaml` that you have previously created.
 Refer to [values.yaml](https://github.com/kubeslice/charts/blob/master/kubeslice-worker/values.yaml) to create `yourvaluesfiel.yaml` and update the gateway-sidecar image subsection to use the local image.
 
-From the sample, 
+From the sample:
 
 ```
 gateway:
@@ -91,7 +91,7 @@ gateway:
   tag: 0.1.0
 ```
 
-Change it to,
+Change it to:
 
 ```
 gateway:
