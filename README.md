@@ -4,15 +4,33 @@ The Slice VPN Gateway is a slice network service component that provides a secur
 
 ## Getting Started
 
+[TBD: Add link to getting started] 
 It is strongly recommended to use a released version.
 
 ### Prerequisites
 
 * Docker installed and running in your local machine
-* A running [`kind`](https://kind.sigs.k8s.io/) or [`Docker Desktop Kubernetes`](https://docs.docker.com/desktop/kubernetes/)
-  cluster 
+* A running [`kind`](https://kind.sigs.k8s.io/)
 * [`kubectl`](https://kubernetes.io/docs/tasks/tools/) installed and configured
-* Install the [`operator`](https://github.com/kubeslice/operator)
+* Follow the getting started from above, to install [`kubeslice-controller`](https://github.com/kubeslice/kubeslice-controller) and [`worker-operator`](https://github.com/kubeslice/worker-operator)
+
+# Local build and update 
+
+## Latest docker image
+[TBD link to docker hub]
+
+## Setting up your helm repo
+
+If you have not added avesha helm repo yet, add it
+
+```console
+helm repo add avesha https://kubeslice.github.io/charts/
+```
+
+upgrade the avesha helm repo
+
+```console
+helm repo update
 
 ### Build docker images
 
@@ -23,7 +41,7 @@ make docker-build
 ```
 
 ### Running locally on Kind
-Load the docker image into kind cluster
+You can load the gateway-sidecar docker image into kind cluster
 
 ```bash
 kind load docker-image my-custom-image:unique-tag --name clustername
