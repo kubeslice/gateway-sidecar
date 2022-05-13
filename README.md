@@ -1,8 +1,5 @@
 # gateway-sidecar
 
-![Docker Image Size](https://img.shields.io/docker/image-size/aveshasystems/gw-sidecar/latest)
-![Docker Image Version](https://img.shields.io/docker/v/aveshasystems/gw-sidecar)
-
 The Slice VPN Gateway is a slice network service component that provides a secure VPN tunnel between any two clusters that are a part of the slice. 
 
 ## Getting Started
