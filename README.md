@@ -34,12 +34,20 @@ upgrade the avesha helm repo
 
 ```console
 helm repo update
-
+```
 ### Build docker images
+
+1. Clone the latest version of gateway sidecar from  the `master` branch.
 
 ```bash
 git clone https://github.com/kubeslice/gateway-sidecar.git
 cd gateway-sidecar
+```
+
+2. Adjust `VERSION` variable in the Makefile to change the docker tag to be built.
+Image is set as `docker.io/aveshasystems/kubeslice-gw-sidecar:$(VERSION)` in the Makefile. Change this if required
+
+```
 make docker-build
 ```
 
@@ -50,8 +58,34 @@ You can load the gateway-sidecar docker image into kind cluster
 kind load docker-image my-custom-image:unique-tag --name clustername
 ```
 
-### Verification
-You can view the sidecar container by describing the gateway pod: 
+### Deploy in a cluster
+
+Update chart values file `yourvaluesfile.yaml` that you have previously created.
+Refer to [values.yaml](https://github.com/kubeslice/charts/blob/master/kubeslice-worker/values.yaml) to create `yourvaluesfiel.yaml` and update the gateway-sidecar image subsection to use the local image.
+
+From the sample , 
+
+```
+gateway:
+  image: docker.io/aveshasystems/gw-sidecar
+  tag: 0.1.0
+```
+
+Change it to ,
+
+```
+gateway:
+  image: <my-custom-image>
+  tag: <unique-tag>
+```
+
+Deploy the updated chart
+
+```console
+make chart-deploy VALUESFILE=yourvaluesfile.yaml
+```
+
+### Verify the gateway sidecar container is running by describing the gateway pod: 
 
 ```bash
 kubectl describe pod <gateway pod name> -n kubeslice-system
