@@ -36,7 +36,6 @@ func getTheIpAndName() (string, string) {
 	}
 	fmt.Println(allInterfaces)
 	for _, a := range allInterfaces {
-		fmt.Println(a.Name)
 		interfaceNames = append(interfaceNames, a.Name)
 	}
 
