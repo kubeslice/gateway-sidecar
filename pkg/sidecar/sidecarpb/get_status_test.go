@@ -19,9 +19,12 @@ package sidecar
 
 import (
 	"context"
+	"fmt"
+	"net"
 	"runtime/debug"
 	"testing"
 
+	nt "github.com/kubeslice/gateway-sidecar/pkg/nettools"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
@@ -29,7 +32,29 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+func getTheIpAndName() (string, string) {
+
+	interfaceNames := make([]string, 2)
+
+	allInterfaces, err := net.Interfaces()
+	if err != nil {
+		fmt.Println("err while getting all the interfaces")
+	}
+
+	for _, a := range allInterfaces {
+		interfaceNames = append(interfaceNames, a.Name)
+	}
+
+	infos, err := nt.GetInterfaceInfos(interfaceNames[1])
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return infos[0].Name, infos[0].IP
+}
+
 func TestGwStatus(t *testing.T) {
+
+	_, InfIP := getTheIpAndName()
 
 	tests := []struct {
 		testName  string
@@ -40,7 +65,7 @@ func TestGwStatus(t *testing.T) {
 	}{
 		{
 			"It should pass",
-			&GwPodStatus{NodeIP: "156.178.1.1", GatewayPodIP: "192.168.29.119",
+			&GwPodStatus{NodeIP: "156.178.1.1", GatewayPodIP: InfIP,
 				NsmIntfStatus: &NsmInterfaceStatus{NsmInterfaceName: "nsm0", NsmIP: "192.178.1.1"},
 				TunnelStatus:  &TunnelInterfaceStatus{NetInterface: "veth0", LocalIP: "192.168.0.1", PeerIP: "192.168.0.2", Latency: 1, RxRate: 1, TxRate: 1}},
 			codes.OK,
@@ -49,7 +74,7 @@ func TestGwStatus(t *testing.T) {
 		},
 		{
 			"Test for cancelled context",
-			&GwPodStatus{NodeIP: "156.178.1.1", GatewayPodIP: "192.168.29.119",
+			&GwPodStatus{NodeIP: "156.178.1.1", GatewayPodIP: InfIP,
 				NsmIntfStatus: &NsmInterfaceStatus{NsmInterfaceName: "nsm0", NsmIP: "192.178.1.1"},
 				TunnelStatus:  &TunnelInterfaceStatus{NetInterface: "veth0", LocalIP: "192.168.0.1", PeerIP: "192.168.0.2", Latency: 1, RxRate: 1, TxRate: 1}},
 			codes.Canceled,

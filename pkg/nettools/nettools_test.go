@@ -34,7 +34,7 @@ func getTheIpAndName() (string, string) {
 	if err != nil {
 		fmt.Println("err while getting all the interfaces")
 	}
-	fmt.Println(allInterfaces)
+
 	for _, a := range allInterfaces {
 		interfaceNames = append(interfaceNames, a.Name)
 	}
