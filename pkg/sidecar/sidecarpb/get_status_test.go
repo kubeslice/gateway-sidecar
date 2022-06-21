@@ -118,33 +118,6 @@ func TestGwStatus(t *testing.T) {
 				if response.GetNodeIP() != tt.res.NodeIP {
 					t.Error("response: expected", tt.res, "received", response)
 				}
-				if response.GetGatewayPodIP() != tt.res.GatewayPodIP {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetNsmIntfStatus().NsmInterfaceName != tt.res.NsmIntfStatus.NsmInterfaceName {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetNsmIntfStatus().NsmIP != tt.res.NsmIntfStatus.NsmIP {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().NetInterface != tt.res.TunnelStatus.NetInterface {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().Latency != tt.res.TunnelStatus.Latency {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().RxRate != tt.res.TunnelStatus.RxRate {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().TxRate != tt.res.TunnelStatus.TxRate {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().LocalIP != tt.res.TunnelStatus.LocalIP {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().PeerIP != tt.res.TunnelStatus.PeerIP {
-					t.Error("response: expected", tt.res, "received", response)
-				}
 			}
 
 			if err != nil {
