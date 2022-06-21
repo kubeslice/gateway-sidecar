@@ -19,6 +19,7 @@ package sidecar
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -29,6 +30,13 @@ import (
 
 type GwSidecar struct {
 	UnimplementedGwSidecarServiceServer
+	GwSidecarProvider
+}
+
+type GwClient struct{}
+
+type GwSidecarProvider interface {
+	CheckIfVppIntfPresent() bool
 }
 
 // Stores the node port of the remote cluster.
@@ -37,15 +45,23 @@ type GwSidecar struct {
 // it over this node port.
 var SliceGwRemoteClusterNodePort string = ""
 
+func (c *GwSidecar) IsVppIntfPresent() bool {
+	return c.CheckIfVppIntfPresent()
+}
+
 // Checks if vpphost interface is present on the host.
 // The vpphost interface is used to set up a network connection between the host kernel stack
 // and the vpp data plane stack.
-func checkIfVppIntfPresent() bool {
+func (s *GwClient) CheckIfVppIntfPresent() bool {
 	vppInterface, err := net.InterfaceByName("vpphost")
 	if err != nil {
 		return false
 	}
 	return vppInterface != nil
+}
+
+func NewGwSidecarClientProvider() (*GwClient, error) {
+	return &GwClient{}, nil
 }
 
 // GetStatus get the status of sidecar.
@@ -58,6 +74,13 @@ func (s *GwSidecar) GetStatus(ctx context.Context, in *empty.Empty) (*GwPodStatu
 }
 
 func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *SliceGwConnectionContext) (*SidecarResponse, error) {
+
+	GwSidecarClient, err := NewGwSidecarClientProvider()
+	gc := GwSidecar{GwSidecarProvider: GwSidecarClient}
+
+	if err != nil {
+		log.Fatal(err.Error(), "could not get GatewaySidecar client for UpdateConnectionContext")
+	}
 	if ctx.Err() == context.Canceled {
 		return nil, status.Errorf(codes.Canceled, "Client cancelled, abandoning.")
 	}
@@ -68,7 +91,7 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid Remote Slice Gateway VPN IP")
 	}
 	log.Infof("conContext : %v", conContext)
-	err := updateGwStatusWithConContext(conContext)
+	err = updateGwStatusWithConContext(conContext)
 	if err != nil {
 		return nil, status.Errorf(codes.FailedPrecondition, "Failed to update the Connection context,tunnel is not up yet!")
 	}
@@ -95,7 +118,9 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 		log.Errorf("Gateway Pod RouteAdd Failed : %v", err)
 	}
 
-	if checkIfVppIntfPresent() {
+	if gc.IsVppIntfPresent() {
+		fmt.Println("----------0000-------------------------------------------------------------------------------------------")
+
 		vppGwIP := net.ParseIP("10.255.255.254")
 		_, localGwNsmSubnetIP, err := net.ParseCIDR(conContext.GetLocalSliceGwNsmSubnet())
 		if err != nil {

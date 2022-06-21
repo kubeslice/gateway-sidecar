@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kubeslice/gateway-sidecar/pkg/sidecar/sidecarpb/mocks"
 	"github.com/kubeslice/gateway-sidecar/pkg/status"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -47,6 +48,8 @@ func TestUpdateConnCtx(t *testing.T) {
 
 	SetStatusMonitor(statusMonitor)
 	tunCheck.UpdateExecModule(mod)
+
+	gwSidecarProvider := mocks.GwSidecarProvider{}
 
 	tests := []struct {
 		testName        string
@@ -113,6 +116,9 @@ func TestUpdateConnCtx(t *testing.T) {
 	defer conn.Close()
 
 	client := NewGwSidecarServiceClient(conn)
+
+	gwSidecarProvider.On("CheckIfVppIntfPresent").Return(true)
+
 	var errVal error = nil
 	fmt.Println(errVal)
 
