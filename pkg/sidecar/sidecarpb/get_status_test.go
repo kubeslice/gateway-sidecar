@@ -32,6 +32,8 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+const NodeIP = "156.178.1.1"
+
 func getTheIpAndName() (string, string) {
 
 	interfaceNames := make([]string, 2)
@@ -65,7 +67,7 @@ func TestGwStatus(t *testing.T) {
 	}{
 		{
 			"It should pass",
-			&GwPodStatus{NodeIP: "156.178.1.1", GatewayPodIP: InfIP,
+			&GwPodStatus{NodeIP: NodeIP, GatewayPodIP: InfIP,
 				NsmIntfStatus: &NsmInterfaceStatus{NsmInterfaceName: "nsm0", NsmIP: "192.178.1.1"},
 				TunnelStatus:  &TunnelInterfaceStatus{NetInterface: "veth0", LocalIP: "192.168.0.1", PeerIP: "192.168.0.2", Latency: 1, RxRate: 1, TxRate: 1}},
 			codes.OK,
@@ -74,7 +76,7 @@ func TestGwStatus(t *testing.T) {
 		},
 		{
 			"Test for cancelled context",
-			&GwPodStatus{NodeIP: "156.178.1.1", GatewayPodIP: InfIP,
+			&GwPodStatus{NodeIP: NodeIP, GatewayPodIP: InfIP,
 				NsmIntfStatus: &NsmInterfaceStatus{NsmInterfaceName: "nsm0", NsmIP: "192.178.1.1"},
 				TunnelStatus:  &TunnelInterfaceStatus{NetInterface: "veth0", LocalIP: "192.168.0.1", PeerIP: "192.168.0.2", Latency: 1, RxRate: 1, TxRate: 1}},
 			codes.Canceled,
@@ -101,7 +103,7 @@ func TestGwStatus(t *testing.T) {
 				cancel()
 			}
 
-			response.NodeIP = "156.178.1.1"
+			response.NodeIP = NodeIP
 			response.GetNsmIntfStatus().NsmIP = "192.178.1.1"
 
 			tunnleStatus := TunnelInterfaceStatus{
