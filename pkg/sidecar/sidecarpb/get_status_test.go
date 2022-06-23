@@ -32,7 +32,12 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-const NodeIP = "156.178.1.1"
+const (
+	NodeIP  = "156.178.1.1"
+	NsmIP   = "192.178.1.1"
+	PeerIP  = "192.168.0.2"
+	LocalIP = "192.168.0.1"
+)
 
 func getTheIpAndName() (string, string) {
 
@@ -68,8 +73,8 @@ func TestGwStatus(t *testing.T) {
 		{
 			"It should pass",
 			&GwPodStatus{NodeIP: NodeIP, GatewayPodIP: InfIP,
-				NsmIntfStatus: &NsmInterfaceStatus{NsmInterfaceName: "nsm0", NsmIP: "192.178.1.1"},
-				TunnelStatus:  &TunnelInterfaceStatus{NetInterface: "veth0", LocalIP: "192.168.0.1", PeerIP: "192.168.0.2", Latency: 1, RxRate: 1, TxRate: 1}},
+				NsmIntfStatus: &NsmInterfaceStatus{NsmInterfaceName: "nsm0", NsmIP: NsmIP},
+				TunnelStatus:  &TunnelInterfaceStatus{NetInterface: "veth0", LocalIP: LocalIP, PeerIP: PeerIP, Latency: 1, RxRate: 1, TxRate: 1}},
 			codes.OK,
 			"",
 			false,
@@ -77,8 +82,8 @@ func TestGwStatus(t *testing.T) {
 		{
 			"Test for cancelled context",
 			&GwPodStatus{NodeIP: NodeIP, GatewayPodIP: InfIP,
-				NsmIntfStatus: &NsmInterfaceStatus{NsmInterfaceName: "nsm0", NsmIP: "192.178.1.1"},
-				TunnelStatus:  &TunnelInterfaceStatus{NetInterface: "veth0", LocalIP: "192.168.0.1", PeerIP: "192.168.0.2", Latency: 1, RxRate: 1, TxRate: 1}},
+				NsmIntfStatus: &NsmInterfaceStatus{NsmInterfaceName: "nsm0", NsmIP: NsmIP},
+				TunnelStatus:  &TunnelInterfaceStatus{NetInterface: "veth0", LocalIP: LocalIP, PeerIP: PeerIP, Latency: 1, RxRate: 1, TxRate: 1}},
 			codes.Canceled,
 			"Client cancelled, abandoning.",
 			true,
@@ -104,15 +109,15 @@ func TestGwStatus(t *testing.T) {
 			}
 
 			response.NodeIP = NodeIP
-			response.GetNsmIntfStatus().NsmIP = "192.178.1.1"
+			response.GetNsmIntfStatus().NsmIP = NsmIP
 
 			tunnleStatus := TunnelInterfaceStatus{
 				NetInterface: "veth0",
 				Latency:      1,
 				RxRate:       1,
 				TxRate:       1,
-				LocalIP:      "192.168.0.1",
-				PeerIP:       "192.168.0.2",
+				LocalIP:      LocalIP,
+				PeerIP:       PeerIP,
 			}
 			response.TunnelStatus = &tunnleStatus
 
