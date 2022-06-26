@@ -122,36 +122,16 @@ func TestGwStatus(t *testing.T) {
 			response.TunnelStatus = &tunnleStatus
 
 			if response != nil {
-				if response.GetNodeIP() != tt.res.NodeIP {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetGatewayPodIP() != tt.res.GatewayPodIP {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetNsmIntfStatus().NsmInterfaceName != tt.res.NsmIntfStatus.NsmInterfaceName {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetNsmIntfStatus().NsmIP != tt.res.NsmIntfStatus.NsmIP {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().NetInterface != tt.res.TunnelStatus.NetInterface {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().Latency != tt.res.TunnelStatus.Latency {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().RxRate != tt.res.TunnelStatus.RxRate {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().TxRate != tt.res.TunnelStatus.TxRate {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().LocalIP != tt.res.TunnelStatus.LocalIP {
-					t.Error("response: expected", tt.res, "received", response)
-				}
-				if response.GetTunnelStatus().PeerIP != tt.res.TunnelStatus.PeerIP {
-					t.Error("response: expected", tt.res, "received", response)
-				}
+				AssertEqual(t, response.GetNodeIP(), tt.res.NodeIP, tt.res, response)
+				AssertEqual(t, response.GetGatewayPodIP(), tt.res.GatewayPodIP, tt.res, response)
+				AssertEqual(t, response.GetNsmIntfStatus().NsmInterfaceName, tt.res.NsmIntfStatus.NsmInterfaceName, tt.res, response)
+				AssertEqual(t, response.GetNsmIntfStatus().NsmIP, tt.res.NsmIntfStatus.NsmIP, tt.res, response)
+				AssertEqual(t, response.GetTunnelStatus().NetInterface, tt.res.TunnelStatus.NetInterface, tt.res, response)
+				AssertEqual(t, response.GetTunnelStatus().Latency, tt.res.TunnelStatus.Latency, tt.res, response)
+				AssertEqual(t, response.GetTunnelStatus().RxRate, tt.res.TunnelStatus.RxRate, tt.res, response)
+				AssertEqual(t, response.GetTunnelStatus().TxRate, tt.res.TunnelStatus.TxRate, tt.res, response)
+				AssertEqual(t, response.GetTunnelStatus().LocalIP, tt.res.TunnelStatus.LocalIP, tt.res, response)
+				AssertEqual(t, response.GetTunnelStatus().PeerIP, tt.res.TunnelStatus.PeerIP, tt.res, response)
 			}
 
 			if err != nil {
@@ -172,5 +152,12 @@ func AssertNoError(t *testing.T, err error) {
 	t.Helper()
 	if err != nil {
 		t.Errorf("Expected No Error but got %s, Stack:\n%s", err, string(debug.Stack()))
+	}
+}
+
+func AssertEqual(t *testing.T, expected interface{}, actual interface{}, expectedResponse interface{}, recievedResponse interface{}) {
+	t.Helper()
+	if expected != actual {
+		t.Error("response: expected", expectedResponse, "received", recievedResponse)
 	}
 }
