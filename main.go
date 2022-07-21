@@ -20,6 +20,8 @@ package main
 import (
 	"fmt"
 	"net"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"sync"
@@ -28,7 +30,6 @@ import (
 
 	"github.com/kubeslice/gateway-sidecar/pkg/bootstrap"
 	"github.com/kubeslice/gateway-sidecar/pkg/logger"
-	"github.com/kubeslice/gateway-sidecar/pkg/metrics"
 	sidecar "github.com/kubeslice/gateway-sidecar/pkg/sidecar/sidecarpb"
 	"github.com/kubeslice/gateway-sidecar/pkg/status"
 	"github.com/lorenzosaino/go-sysctl"
@@ -109,7 +110,7 @@ func shutdownHandler(wg *sync.WaitGroup) {
 
 func main() {
 	var grpcPort string = "5000"
-	var metricCollectorPort string = "18080"
+	// var metricCollectorPort string = "18080"
 	// Get value of a net.ipv4.ip_forward using sysctl
 	val, err := sysctl.Get("net.ipv4.ip_forward")
 	if err != nil {
@@ -130,10 +131,13 @@ func main() {
 	// Start the GRPC Server to communicate with slice controller.
 	go startGrpcServer(grpcPort)
 
-	go metrics.StartMetricsCollector(metricCollectorPort)
+	// go metrics.StartMetricsCollector(metricCollectorPort)
 
 	go shutdownHandler(wg)
 
+	go func() {
+		log.Info(http.ListenAndServe("localhost:6060", nil))
+	}()
 	wg.Wait()
 	log.Infof("Gateway Sidecar exited")
 

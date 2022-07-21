@@ -182,7 +182,7 @@ func (t *TunnelChecker) startPing(host string) error {
 	pinger.SetPrivileged(true)
 	pinger.OnFinish = t.onFinishCb
 
-	go pinger.Run()
+	// go pinger.Run()
 
 	return nil
 }
