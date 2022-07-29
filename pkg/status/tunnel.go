@@ -175,7 +175,6 @@ func (t *TunnelChecker) startPing(host string) error {
 		t.log.Errorf("Pinger Create failed: %s", err.Error())
 		return err
 	}
-	fmt.Println("pinger id", pinger.ID())
 	t.pinger = pinger
 	pinger.Count = 3
 	pinger.Interval = time.Second
@@ -190,7 +189,6 @@ func (t *TunnelChecker) startPing(host string) error {
 
 // onFinishCb is called when ping is finished.
 func (t *TunnelChecker) onFinishCb(stats *ping.Statistics) {
-	fmt.Println("onFinishCb called..")
 	if t.tunStatus != nil {
 		t.tunStatus.Latency = uint64(stats.AvgRtt / time.Millisecond)
 		t.log.Debugf("Latency :%v", t.tunStatus.Latency)
