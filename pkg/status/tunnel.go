@@ -128,8 +128,8 @@ func (t *TunnelChecker) MessageHandler(msg interface{}) error {
 	case UpdatePeerIP:
 		t.log.Debugf("PeerIP Message %v ", t.tunStatus.PeerIP)
 		//do not start new pinger in case Peer IP is same
-		ip := fmt.Sprintf("%v", tunMsg.msg)
-		if t.tunStatus.PeerIP == ip {
+		currentIp := fmt.Sprintf("%v", tunMsg.msg)
+		if t.tunStatus.PeerIP == currentIp {
 			return nil
 		}
 		t.tunStatus.PeerIP = fmt.Sprintf("%v", tunMsg.msg)
