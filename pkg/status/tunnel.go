@@ -19,7 +19,6 @@ package status
 
 import (
 	"fmt"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -150,8 +149,6 @@ func (t *TunnelChecker) MessageHandler(msg interface{}) error {
 		}
 		t.log.Debugf("Ping Re-Started")
 	}
-	fmt.Println("active goroutines", runtime.NumGoroutine())
-
 	return nil
 }
 
