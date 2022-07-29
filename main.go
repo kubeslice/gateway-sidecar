@@ -133,6 +133,7 @@ func main() {
 	go metrics.StartMetricsCollector(metricCollectorPort)
 
 	go shutdownHandler(wg)
+	
 	wg.Wait()
 	log.Infof("Gateway Sidecar exited")
 

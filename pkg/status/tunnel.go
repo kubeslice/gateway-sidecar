@@ -132,7 +132,7 @@ func (t *TunnelChecker) MessageHandler(msg interface{}) error {
 		if t.tunStatus.PeerIP == currentIp {
 			return nil
 		}
-		t.tunStatus.PeerIP = fmt.Sprintf("%v", tunMsg.msg)
+		t.tunStatus.PeerIP = currentIp
 		if t.pinger == nil {
 			err := t.startPing(t.tunStatus.PeerIP)
 			if err != nil {
