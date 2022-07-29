@@ -20,6 +20,8 @@ package main
 import (
 	"fmt"
 	"net"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"sync"
@@ -133,7 +135,9 @@ func main() {
 	go metrics.StartMetricsCollector(metricCollectorPort)
 
 	go shutdownHandler(wg)
-
+	go func() {
+		log.Info(http.ListenAndServe("localhost:6060", nil))
+	}()
 	wg.Wait()
 	log.Infof("Gateway Sidecar exited")
 

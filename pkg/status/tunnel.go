@@ -19,6 +19,7 @@ package status
 
 import (
 	"fmt"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -124,23 +125,23 @@ func (t *TunnelChecker) Stop() error {
 // MessageHandler to provide the Tunnel status
 func (t *TunnelChecker) MessageHandler(msg interface{}) error {
 	tunMsg := msg.(*tunnelMessage)
-
 	switch tunMsg.ty {
 	case UpdatePeerIP:
 		t.log.Debugf("PeerIP Message %v ", t.tunStatus.PeerIP)
-
+		//do not start new pinger in case Peer IP is same
+		ip := fmt.Sprintf("%v", tunMsg.msg)
+		if t.tunStatus.PeerIP == ip {
+			return nil
+		}
 		t.tunStatus.PeerIP = fmt.Sprintf("%v", tunMsg.msg)
-		if t.pinger != nil {
-			// Stop the Pinger
-			t.pinger.Stop()
-			t.pinger = nil
+		if t.pinger == nil {
+			err := t.startPing(t.tunStatus.PeerIP)
+			if err != nil {
+				t.log.Errorf("Ping Start failed: %s", err.Error())
+				return err
+			}
+			t.log.Debugf("Ping Started")
 		}
-		err := t.startPing(t.tunStatus.PeerIP)
-		if err != nil {
-			t.log.Errorf("Ping Start failed: %s", err.Error())
-			return err
-		}
-		t.log.Debugf("Ping Started")
 	case RestartPinger:
 		err := t.startPing(t.tunStatus.PeerIP)
 		if err != nil {
@@ -149,6 +150,8 @@ func (t *TunnelChecker) MessageHandler(msg interface{}) error {
 		}
 		t.log.Debugf("Ping Re-Started")
 	}
+	fmt.Println("active goroutines", runtime.NumGoroutine())
+
 	return nil
 }
 
@@ -175,6 +178,7 @@ func (t *TunnelChecker) startPing(host string) error {
 		t.log.Errorf("Pinger Create failed: %s", err.Error())
 		return err
 	}
+	fmt.Println("pinger id", pinger.ID())
 	t.pinger = pinger
 	pinger.Count = 3
 	pinger.Interval = time.Second
@@ -189,6 +193,7 @@ func (t *TunnelChecker) startPing(host string) error {
 
 // onFinishCb is called when ping is finished.
 func (t *TunnelChecker) onFinishCb(stats *ping.Statistics) {
+	fmt.Println("onFinishCb called..")
 	if t.tunStatus != nil {
 		t.tunStatus.Latency = uint64(stats.AvgRtt / time.Millisecond)
 		t.log.Debugf("Latency :%v", t.tunStatus.Latency)
