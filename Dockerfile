@@ -39,7 +39,8 @@ RUN go mod download &&\
     go env -w GOPRIVATE=github.com/kubeslice && \
     CGO_ENABLED=1 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/kubeslice-gw-sidecar main.go
 
-
+RUN go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
+RUN grpcurl --help
 # Build reduced image from base alpine
 
 FROM ${PLATFORM}/alpine:3.15

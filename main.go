@@ -71,7 +71,7 @@ func bootstrapGwPod(wg *sync.WaitGroup) error {
 }
 
 func startGrpcServer(grpcPort string) error {
-	address := fmt.Sprintf(":%s", grpcPort)
+	address := fmt.Sprintf("0.0.0.0:%s", grpcPort)
 	log.Infof("Starting GRPC Server for %v Pod at %v", "GW-Sidecar", address)
 	lis, err := net.Listen("tcp", address)
 	if err != nil {
