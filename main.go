@@ -18,6 +18,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -26,6 +27,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/kubeslice/gateway-sidecar/pkg/bootstrap"
 	"github.com/kubeslice/gateway-sidecar/pkg/logger"
 	"github.com/kubeslice/gateway-sidecar/pkg/metrics"
@@ -33,6 +35,7 @@ import (
 	"github.com/kubeslice/gateway-sidecar/pkg/status"
 	"github.com/lorenzosaino/go-sysctl"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -133,6 +136,19 @@ func main() {
 	go metrics.StartMetricsCollector(metricCollectorPort)
 
 	go shutdownHandler(wg)
+
+	conn, err := grpc.Dial("10.1.157.1:5000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		fmt.Println("err:",err.Error())
+	}
+	defer conn.Close()
+	client := sidecar.NewGwSidecarServiceClient(conn)
+
+	res, err := client.GetStatus(context.Background(), &empty.Empty{})
+	if err != nil {
+		fmt.Println("err:",err.Error())
+	}
+	fmt.Println("res:",res)
 
 	wg.Wait()
 	log.Infof("Gateway Sidecar exited")
