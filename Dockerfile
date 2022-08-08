@@ -40,9 +40,9 @@ RUN go mod download &&\
     CGO_ENABLED=1 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o bin/kubeslice-gw-sidecar main.go
 
 RUN go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
-RUN grpcurl --help
-# Build reduced image from base alpine
+#RUN grpcurl --help
 
+# Build reduced image from base alpine
 FROM ${PLATFORM}/alpine:3.15
 
 # tc - is needed for traffic control and shaping on the sidecar.  it is part of the iproute2
@@ -53,7 +53,7 @@ RUN apk add --no-cache ca-certificates \
 # Copy our static executable.
 
 COPY --from=gobuilder bin/kubeslice-gw-sidecar .
-
+COPY --from=gobuilder /go/bin/grpcurl .
 EXPOSE 5000
 
 EXPOSE 8080
