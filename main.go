@@ -125,18 +125,6 @@ func main() {
 			log.Fatalf("Set of ipv4.ip_forward errored %v", err)
 		}
 	}
-	wg := &sync.WaitGroup{}
-	wg.Add(2)
-
-	go bootstrapGwPod(wg)
-
-	// Start the GRPC Server to communicate with slice controller.
-	go startGrpcServer(grpcPort)
-
-	go metrics.StartMetricsCollector(metricCollectorPort)
-
-	go shutdownHandler(wg)
-
 	conn, err := grpc.Dial("10.1.157.1:5000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println("err:",err.Error())
@@ -150,6 +138,19 @@ func main() {
 	}
 	fmt.Println("res:",res)
 
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+
+	go bootstrapGwPod(wg)
+
+	// Start the GRPC Server to communicate with slice controller.
+	go startGrpcServer(grpcPort)
+
+	go metrics.StartMetricsCollector(metricCollectorPort)
+
+	go shutdownHandler(wg)
+
+	
 	wg.Wait()
 	log.Infof("Gateway Sidecar exited")
 
