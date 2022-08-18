@@ -4,10 +4,10 @@
 if [ ! $(kind get clusters | grep controller) ];then
   kind create cluster --name controller --config .github/workflows/scripts/cluster.yaml --image kindest/node:v1.22.7
   ip=$(docker inspect controller-control-plane | jq -r '.[0].NetworkSettings.Networks.kind.IPAddress') 
-#  echo $ip
-# loading docker image into kind controller
+ #  echo $ip
+ # loading docker image into kind controller
    kind load docker-image gw-sidecar:e2e-latest
-# Replace loopback IP with docker ip
+ # Replace loopback IP with docker ip
   kind get kubeconfig --name controller | sed "s/127.0.0.1.*/$ip:6443/g" > /home/runner/.kube/kind1.yaml
 fi
 
