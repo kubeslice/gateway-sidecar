@@ -27,32 +27,25 @@ import (
 )
 
 var (
-	sliceGwTc                         = TcInfo{}
-	interClusterDscpClass      string = "Default"
-	dscpClsStringToDscpCodeMap        = map[string]string{
-		"QOS_PROFILE_DSCP_CLASS_DEFAULT": "Default",
-		"QOS_PROFILE_DSCP_CLASS_AF11":    "AF11",
-		"QOS_PROFILE_DSCP_CLASS_AF12":    "AF12",
-		"QOS_PROFILE_DSCP_CLASS_AF13":    "AF13",
-		"QOS_PROFILE_DSCP_CLASS_AF21":    "AF21",
-		"QOS_PROFILE_DSCP_CLASS_AF22":    "AF22",
-		"QOS_PROFILE_DSCP_CLASS_AF23":    "AF23",
-		"QOS_PROFILE_DSCP_CLASS_AF31":    "AF31",
-		"QOS_PROFILE_DSCP_CLASS_AF32":    "AF32",
-		"QOS_PROFILE_DSCP_CLASS_AF33":    "AF33",
-		"QOS_PROFILE_DSCP_CLASS_AF41":    "AF41",
-		"QOS_PROFILE_DSCP_CLASS_AF42":    "AF42",
-		"QOS_PROFILE_DSCP_CLASS_AF43":    "AF43",
-		"QOS_PROFILE_DSCP_CLASS_EF":      "EF",
-	}
-	log = logger.NewLogger()
+	sliceGwTc       = TcInfo{}
+	log             = logger.NewLogger()
+	dscpClassesList = []string{"AF11", "AF12", "AF12", "AF12", "AF21", "AF21", "AF22", "AF23", "AF31", "AF32", "AF33", "AF41", "AF42", "AF43", "EF"}
+	userDscpClasses = []string{}
 )
 
+func containsDscp(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
 func sliceGwSetInterClusterDscpConfig(dscpClass string) error {
-	_, valid := dscpClsStringToDscpCodeMap[dscpClass]
-	if !valid {
+	var interClusterDscpClass string = "Default"
+	if !containsDscp(dscpClassesList, dscpClass) {
 		log.Infof("Dscp class string is not valid: %v", dscpClass)
-		dscpClass = "QOS_PROFILE_DSCP_CLASS_DEFAULT"
+		dscpClass = interClusterDscpClass
 	}
 
 	portFilter := ""
@@ -66,31 +59,22 @@ func sliceGwSetInterClusterDscpConfig(dscpClass string) error {
 		portFilter = "--source-port 11194"
 	}
 
-	if interClusterDscpClass == dscpClsStringToDscpCodeMap[dscpClass] {
+	if interClusterDscpClass == dscpClass {
 		log.Infof("No change in DSCP marking needed: %v", interClusterDscpClass)
 		return nil
 	}
-	// Delete existing DSCP config before adding a new one
-	if interClusterDscpClass != "Default" {
-		ipTablesCmd := fmt.Sprintf("iptables -t mangle -D POSTROUTING -p udp %s -j DSCP --set-dscp-class %s",
-			portFilter, interClusterDscpClass)
-		_, err := runCommand(ipTablesCmd)
+	var err error
+	if !containsDscp(userDscpClasses, dscpClass) {
+		log.Infof("Updating DSCP marking from %v to %v", interClusterDscpClass, dscpClass)
+		ipTablesCmd := fmt.Sprintf("iptables -t mangle -A POSTROUTING -p udp %s -j DSCP --set-dscp-class %s",
+			portFilter, dscpClass)
+		_, err = runCommand(ipTablesCmd)
 		if err != nil {
-			log.Errorf("Could not remove existing DSCP config: %v. DSCP class in use: %v", err, interClusterDscpClass)
+			log.Errorf("DSCP marking failed: %v. DSCP class in use: %v", err, interClusterDscpClass)
 			return err
 		}
+		userDscpClasses = append(userDscpClasses, dscpClass)
 	}
-
-	ipTablesCmd := fmt.Sprintf("iptables -t mangle -A POSTROUTING -p udp %s -j DSCP --set-dscp-class %s",
-		portFilter, dscpClsStringToDscpCodeMap[dscpClass])
-	_, err := runCommand(ipTablesCmd)
-	if err != nil {
-		log.Errorf("DSCP marking failed: %v. DSCP class in use: %v", err, interClusterDscpClass)
-	} else {
-		log.Infof("Updating DSCP marking from %v to %v", interClusterDscpClass, dscpClsStringToDscpCodeMap[dscpClass])
-		interClusterDscpClass = dscpClsStringToDscpCodeMap[dscpClass]
-	}
-
 	return err
 }
 
