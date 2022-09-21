@@ -66,6 +66,7 @@ func sliceGwSetInterClusterDscpConfig(dscpClass string) error {
 	}
 	// Delete existing DSCP config before adding a new one
 	if dscpClassInUse != "Default" {
+		log.Infof("Updating DSCP marking from %v to %v", dscpClassInUse, dscpClass)
 		ipTablesCmd := fmt.Sprintf("iptables -t mangle -D POSTROUTING -p udp %s -j DSCP --set-dscp-class %s",
 			portFilter, dscpClassInUse)
 		_, err := runCommand(ipTablesCmd)
@@ -73,14 +74,14 @@ func sliceGwSetInterClusterDscpConfig(dscpClass string) error {
 			log.Errorf("Could not remove existing DSCP config: %v. DSCP class in use: %v", err, dscpClassInUse)
 			return err
 		}
+		dscpClassInUse = "Default"
 	}
 
-	log.Infof("Updating DSCP marking from %v to %v", dscpClassInUse, dscpClass)
 	ipTablesCmd := fmt.Sprintf("iptables -t mangle -A POSTROUTING -p udp %s -j DSCP --set-dscp-class %s",
 		portFilter, dscpClass)
 	_, err := runCommand(ipTablesCmd)
 	if err != nil {
-		log.Errorf("DSCP marking failed: %v. DSCP class in use: %v", err, dscpClassInUse)
+		log.Errorf("DSCP marking failed: %v. DSCP class in use: %v", err, dscpClass)
 		return err
 	}
 	dscpClassInUse = dscpClass
