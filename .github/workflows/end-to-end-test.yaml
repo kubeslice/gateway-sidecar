@@ -75,7 +75,7 @@ jobs:
         
     - name: wait for report deploy on site ( you can check report here also )
       run: |
-         sleep 200
+         sleep 201
          echo 'https://kubeslice.github.io/e2e-allure-reports/Kind-${{ github.event.repository.name }}-${{ github.base_ref }}-${{ github.run_number }}-${{ steps.date.outputs.date }}/index.html'
 
     - name: Report link on Pull Request comment
