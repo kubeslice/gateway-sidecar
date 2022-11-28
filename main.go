@@ -37,6 +37,7 @@ import (
 	"github.com/lorenzosaino/go-sysctl"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/reflection"
 )
 
 const (
@@ -84,6 +85,9 @@ func startGrpcServer(grpcPort string, wg *sync.WaitGroup) error {
 	}
 	srv := grpc.NewServer()
 	sidecar.RegisterGwSidecarServiceServer(srv, &sidecar.GwSidecar{})
+
+	// TODO: only for debug purpose please revert
+	reflection.Register(srv)
 
 	err = srv.Serve(lis)
 	if err != nil {
