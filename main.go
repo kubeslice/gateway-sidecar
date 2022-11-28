@@ -101,7 +101,7 @@ func startGrpcServer(grpcPort string, wg *sync.WaitGroup) error {
 }
 
 func getTun0PerrIp() (string, error) {
-	time.Sleep(15 * time.Second)
+	time.Sleep(30 * time.Second)
 	// Get the tun0 interface IP address
 	infIp, err := nettools.GetInterfaceIP("tun0")
 	fmt.Println("recieved tun0 from getTun0PerrIP", infIp)
@@ -124,6 +124,9 @@ func getTun0PerrIp() (string, error) {
 		fmt.Println("err:", err.Error())
 	}
 	fmt.Println("res from func", res)
+	if res.TunnelStatus.PeerIP == "" {
+		time.Sleep(10 * time.Second)
+	}
 	return res.TunnelStatus.PeerIP, nil
 }
 
