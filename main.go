@@ -100,8 +100,7 @@ func startGrpcServer(grpcPort string, wg *sync.WaitGroup) error {
 	return nil
 }
 
-func startGrpcClient(grpcPort string) error {
-	// Wait for 15 sec
+func getTun0PerrIp() (string, error) {
 	time.Sleep(15 * time.Second)
 	// Get the tun0 interface IP address
 	infIp, err := nettools.GetInterfaceIP("tun0")
@@ -112,6 +111,27 @@ func startGrpcClient(grpcPort string) error {
 		log.Fatalf("Error getting the interface IP address", err)
 	}
 	address := infIp + ":5000"
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		fmt.Println("err:", err.Error())
+	}
+	defer conn.Close()
+	client := sidecar.NewGwSidecarServiceClient(conn)
+
+	res, err := client.GetStatus(context.Background(), &empty.Empty{})
+	if err != nil {
+		fmt.Println("err:", err.Error())
+	}
+
+	return res.TunnelStatus.PeerIP, nil
+}
+
+func startGrpcClient(grpcPort string) error {
+	ip, err := getTun0PerrIp()
+	if err != nil {
+		log.Fatalf("Error getting the interface IP address", err)
+	}
+	address := ip + ":5000"
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println("err:", err.Error())
