@@ -126,6 +126,20 @@ func main() {
 		}
 	}
 
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+
+	go bootstrapGwPod(wg)
+
+	// Start the GRPC Server to communicate with slice controller.
+	go startGrpcServer(grpcPort)
+
+	go metrics.StartMetricsCollector(metricCollectorPort)
+
+	go shutdownHandler(wg)
+
+	wg.Wait()
+
 	address := fmt.Sprintf("0.0.0.0:%s", grpcPort)
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -140,19 +154,5 @@ func main() {
 	}
 	fmt.Println("res:", res)
 
-	wg := &sync.WaitGroup{}
-	wg.Add(2)
-
-	go bootstrapGwPod(wg)
-
-	// Start the GRPC Server to communicate with slice controller.
-	go startGrpcServer(grpcPort)
-
-	go metrics.StartMetricsCollector(metricCollectorPort)
-
-	go shutdownHandler(wg)
-
-	wg.Wait()
 	log.Infof("Gateway Sidecar exited")
-
 }
