@@ -31,6 +31,7 @@ import (
 	"github.com/kubeslice/gateway-sidecar/pkg/bootstrap"
 	"github.com/kubeslice/gateway-sidecar/pkg/logger"
 	"github.com/kubeslice/gateway-sidecar/pkg/metrics"
+	"github.com/kubeslice/gateway-sidecar/pkg/nettools"
 	sidecar "github.com/kubeslice/gateway-sidecar/pkg/sidecar/sidecarpb"
 	"github.com/kubeslice/gateway-sidecar/pkg/status"
 	"github.com/lorenzosaino/go-sysctl"
@@ -96,7 +97,17 @@ func startGrpcServer(grpcPort string, wg *sync.WaitGroup) error {
 }
 
 func startGrpcClient(grpcPort string) error {
-	address := fmt.Sprintf("0.0.0.0:%s", grpcPort)
+	// Wait for 15 sec
+	time.Sleep(15 * time.Second)
+	// Get the tun0 interface IP address
+	infIp, err := nettools.GetInterfaceIP("tun0")
+	if infIp == "" {
+		fmt.Println("unable to get tun0 IP")
+	}
+	if err != nil {
+		log.Fatalf("Error getting the interface IP address", err)
+	}
+	address := infIp + ":5000"
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println("err:", err.Error())
