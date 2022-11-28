@@ -50,6 +50,7 @@ func tcCmdError(tcCmd string, err error, cmdOut string) string {
 func getGwPodStatus() (*GwPodStatus, error) {
 	podStatus := &GwPodStatus{}
 	podStatus.GatewayPodIP = nettools.GetPodIP()
+	podStatus.GatewayPodName = os.Getenv("HOSTNAME")
 	podStatus.NodeIP = os.Getenv("NODE_IP")
 	podNsmIP, err := nettools.GetInterfaceIP(nsmInterfaceName)
 	if err != nil {

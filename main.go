@@ -31,7 +31,6 @@ import (
 	"github.com/kubeslice/gateway-sidecar/pkg/bootstrap"
 	"github.com/kubeslice/gateway-sidecar/pkg/logger"
 	"github.com/kubeslice/gateway-sidecar/pkg/metrics"
-	"github.com/kubeslice/gateway-sidecar/pkg/nettools"
 	sidecar "github.com/kubeslice/gateway-sidecar/pkg/sidecar/sidecarpb"
 	"github.com/kubeslice/gateway-sidecar/pkg/status"
 	"github.com/lorenzosaino/go-sysctl"
@@ -126,13 +125,9 @@ func main() {
 			log.Fatalf("Set of ipv4.ip_forward errored %v", err)
 		}
 	}
-	// Get the tun0 interface IP address
-	infIp, err := nettools.GetInterfaceIP("tun0")
-	if err != nil {
-		log.Fatalf("Error getting the interface IP address", err)
-	}
-	grpcAddr := infIp + ":5000"
-	conn, err := grpc.Dial(grpcAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	address := fmt.Sprintf("0.0.0.0:%s", grpcPort)
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println("err:", err.Error())
 	}
