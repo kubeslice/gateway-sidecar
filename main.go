@@ -73,7 +73,7 @@ func bootstrapGwPod(wg *sync.WaitGroup) error {
 	return nil
 }
 
-func startGrpcServer(grpcPort string) error {
+func startGrpcServer(grpcPort string, wg *sync.WaitGroup) error {
 	address := fmt.Sprintf("0.0.0.0:%s", grpcPort)
 	log.Infof("Starting GRPC Server for %v Pod at %v", "GW-Sidecar", address)
 	lis, err := net.Listen("tcp", address)
@@ -89,8 +89,26 @@ func startGrpcServer(grpcPort string) error {
 		log.Errorf("Start GRPC Server Failed with %v", err.Error())
 		return err
 	}
+	wg.Done()
 	log.Infof("GRPC Server exited gracefully")
 
+	return nil
+}
+
+func startGrpcClient(grpcPort string) error {
+	address := fmt.Sprintf("0.0.0.0:%s", grpcPort)
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		fmt.Println("err:", err.Error())
+	}
+	defer conn.Close()
+	client := sidecar.NewGwSidecarServiceClient(conn)
+
+	res, err := client.GetStatus(context.Background(), &empty.Empty{})
+	if err != nil {
+		fmt.Println("err:", err.Error())
+	}
+	fmt.Println("res:", res)
 	return nil
 }
 
@@ -127,32 +145,20 @@ func main() {
 	}
 
 	wg := &sync.WaitGroup{}
-	wg.Add(2)
+	wg.Add(3)
 
 	go bootstrapGwPod(wg)
 
 	// Start the GRPC Server to communicate with slice controller.
-	go startGrpcServer(grpcPort)
+	go startGrpcServer(grpcPort, wg)
+
+	// Start the GRPC Client to fetch info from remote gw pod
+	go startGrpcClient(grpcPort)
 
 	go metrics.StartMetricsCollector(metricCollectorPort)
 
 	go shutdownHandler(wg)
 
 	wg.Wait()
-
-	address := fmt.Sprintf("0.0.0.0:%s", grpcPort)
-	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		fmt.Println("err:", err.Error())
-	}
-	defer conn.Close()
-	client := sidecar.NewGwSidecarServiceClient(conn)
-
-	res, err := client.GetStatus(context.Background(), &empty.Empty{})
-	if err != nil {
-		fmt.Println("err:", err.Error())
-	}
-	fmt.Println("res:", res)
-
 	log.Infof("Gateway Sidecar exited")
 }
