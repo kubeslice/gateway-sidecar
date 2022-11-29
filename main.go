@@ -133,6 +133,7 @@ func getTun0PerrIp() (string, error) {
 func startGrpcClient(grpcPort string) error {
 	ip, err := getTun0PerrIp()
 	fmt.Println("preeIP", ip)
+	time.Sleep(30 * time.Second)
 	if err != nil {
 		log.Fatalf("Error getting the interface IP address", err)
 	}
