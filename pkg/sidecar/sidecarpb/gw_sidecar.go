@@ -54,6 +54,7 @@ func (s *GwSidecar) GetStatus(ctx context.Context, in *empty.Empty) (*GwPodStatu
 		return nil, status.Errorf(codes.Canceled, "Client cancelled, abandoning.")
 	}
 	podStatus, err := getGwPodStatus()
+	log.Info("podStatus","podStatus",podStatus)
 	return podStatus, err
 }
 
