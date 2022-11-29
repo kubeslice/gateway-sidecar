@@ -137,6 +137,7 @@ func startGrpcClient(grpcPort string) error {
 		log.Fatalf("Error getting the interface IP address", err)
 	}
 	address := ip + ":5000"
+	fmt.Println("logging the address", address)
 	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println("err:", err.Error())
