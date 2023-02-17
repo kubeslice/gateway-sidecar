@@ -2,11 +2,11 @@
 
 The Slice VPN Gateway is a slice network service component that provides a secure VPN tunnel between any two clusters that are a part of the slice. 
 
-## Getting Started
+## Get Started
 
 Please refer to our documentation on:
-- [Installing KubeSlice on cloud clusters](https://kubeslice.io/documentation/open-source/0.5.0/getting-started-with-cloud-clusters/installing-kubeslice/installing-the-kubeslice-controller)
-- [Installing KubeSlice on kind clusters](https://kubeslice.io/documentation/open-source/0.5.0/tutorials/kind-install-kubeslice-controller)
+- [Install KubeSlice on cloud clusters](https://kubeslice.io/documentation/open-source/0.5.0/getting-started-with-cloud-clusters/installing-kubeslice/installing-the-kubeslice-controller)
+- [Install KubeSlice on kind clusters](https://kubeslice.io/documentation/open-source/0.5.0/tutorials/kind-install-kubeslice-controller)
 
 ### Prerequisites
 Before you begin, make sure the following prerequisites are met:
@@ -14,17 +14,19 @@ Before you begin, make sure the following prerequisites are met:
 * A running [`kind`](https://kind.sigs.k8s.io/).
 * [`kubectl`](https://kubernetes.io/docs/tasks/tools/) is installed and configured.
 * You have prepared the environment to install [`kubeslice-controller`](https://github.com/kubeslice/kubeslice-controller) on the controller cluster
- and [`worker-operator`](https://github.com/kubeslice/worker-operator) on the worker cluster. For more information, see [Prerequisites](https://kubeslice.io/documentation/open-source/0.5.0/getting-started-with-cloud-clusters/prerequisites/).
+ and [`worker-operator`](https://github.com/kubeslice/worker-operator) on the worker cluster. For more information, see [Prerequisites](https://kubeslice.io/documentation/open-source/0.6.0/getting-started-with-cloud-clusters/prerequisites/).
 
-# Local Build and Update 
+# Build and Deploy gateway-sidecar on a Kind Cluster 
 
-#### Latest Docker Hub Image
+To download the latest gateway-sidecar docker hub image, click [here](https://hub.docker.com/r/aveshasystems/gw-sidecar).
+
+The following command pulls the latest docker image:
 
 ```console
 docker pull aveshasystems/gw-sidecar:latest
 ```
 
-## Setting up Your Helm Repo
+## Set up Your Helm Repo
 
 If you have not added avesha helm repo yet, add it.
 
@@ -41,47 +43,48 @@ helm repo update
 
 1. Clone the latest version of gateway sidecar from  the `master` branch.
 
-```bash
-git clone https://github.com/kubeslice/gateway-sidecar.git
-cd gateway-sidecar
-```
+   ```bash
+   git clone https://github.com/kubeslice/gateway-sidecar.git
+   cd gateway-sidecar
+   ```
 
-2. Adjust the `VERSION` variable in the Makefile to change the docker tag to be built.
-Image is set as `docker.io/aveshasystems/kubeslice-gw-sidecar:$(VERSION)` in the Makefile. Change this if required
+2. Edit the `VERSION` variable in the Makefile to change the docker tag to be built.
+   Image is set as `docker.io/aveshasystems/kubeslice-gw-sidecar:$(VERSION)` in the Makefile. Change this if required
 
-```
-make docker-build
-```
+   ```
+   make docker-build
+   ```
 
-### Running Locally on Kind Clusters
+### Run Locally on a Kind Cluster
 1. You can load the gateway-sidecar docker image into a kind cluster.
 
-```bash
-kind load docker-image my-custom-image:unique-tag --name clustername
-```
+   ```bash
+   kind load docker-image my-custom-image:unique-tag --name clustername
+   ```
 
-Example
+   Example
 
-```console
-kind load docker-image aveshasystems/kubeslice-gw-sidecar:1.2.1 --name kind
-```
+   ```console
+   kind load docker-image aveshasystems/kubeslice-gw-sidecar:1.2.1 --name kind
+   ```
 
 2. Check the loaded image in the cluster. Modify the node name if required.
 
-```console
-docker exec -it <node-name> crictl images
-```
+   ```console
+   docker exec -it <node-name> crictl images
+   ```
 
-Example
+   
+   Example
 
-```console
-docker exec -it kind-control-plane crictl images
-```
+   ```console
+   docker exec -it kind-control-plane crictl images
+   ```
 
-### Deploy in a Cluster
+### Deploy on a Cluster
 
 Update a chart values file called `yourvaluesfile.yaml` that you have previously created.
-Refer to [values.yaml](https://github.com/kubeslice/charts/blob/master/charts/kubeslice-worker/values.yaml) to create `yourvaluesfiel.yaml` and update the gateway-sidecar image subsection to use the local image.
+Refer to the [values.yaml](https://github.com/kubeslice/charts/blob/master/charts/kubeslice-worker/values.yaml) to create `yourvaluesfiel.yaml` and update the gateway-sidecar image subsection to use the local image.
 
 From the sample:
 
@@ -107,7 +110,7 @@ make chart-deploy VALUESFILE=yourvaluesfile.yaml
 
 ### Verify the Installation
 
-Verify the Gateway Sidecar Container is running by describing the gateway pod. 
+Verify the Gateway Sidecar Container is running by checking the status of gateway pod belonging to the `kubeslice-system` namespace.
 
 ```bash
 kubectl describe pod <gateway pod name> -n kubeslice-system
