@@ -5,8 +5,8 @@ The Slice VPN Gateway is a slice network service component that provides a secur
 ## Get Started
 
 Please refer to our documentation on:
-- [Install KubeSlice on cloud clusters](https://kubeslice.io/documentation/open-source/0.5.0/getting-started-with-cloud-clusters/installing-kubeslice/installing-the-kubeslice-controller)
-- [Install KubeSlice on kind clusters](https://kubeslice.io/documentation/open-source/0.5.0/tutorials/kind-install-kubeslice-controller)
+- [Install KubeSlice on cloud clusters](https://kubeslice.io/documentation/open-source/0.6.0/getting-started-with-cloud-clusters/installing-kubeslice/installing-the-kubeslice-controller)
+- [Install KubeSlice on kind clusters](https://kubeslice.io/documentation/open-source/0.6.0/tutorials/kind-install-kubeslice-controller)
 
 ### Prerequisites
 Before you begin, make sure the following prerequisites are met:
@@ -16,7 +16,7 @@ Before you begin, make sure the following prerequisites are met:
 * You have prepared the environment to install [`kubeslice-controller`](https://github.com/kubeslice/kubeslice-controller) on the controller cluster
  and [`worker-operator`](https://github.com/kubeslice/worker-operator) on the worker cluster. For more information, see [Prerequisites](https://kubeslice.io/documentation/open-source/0.6.0/getting-started-with-cloud-clusters/prerequisites/).
 
-# Build and Deploy gateway-sidecar on a Kind Cluster 
+# Build and Deploy Gateway Sidecar on a Kind Cluster 
 
 To download the latest gateway-sidecar docker hub image, click [here](https://hub.docker.com/r/aveshasystems/gw-sidecar).
 
@@ -83,7 +83,7 @@ helm repo update
 
 ### Deploy on a Cluster
 
-Update a chart values file called `yourvaluesfile.yaml` that you have previously created.
+Update the chart values file called `yourvaluesfile.yaml` that you have previously created.
 Refer to the [values.yaml](https://github.com/kubeslice/charts/blob/master/charts/kubeslice-worker/values.yaml) to create `yourvaluesfiel.yaml` and update the gateway-sidecar image subsection to use the local image.
 
 From the sample:
