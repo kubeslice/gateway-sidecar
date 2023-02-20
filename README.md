@@ -81,7 +81,7 @@ helm repo update
    docker exec -it kind-control-plane crictl images
    ```
 
-### Deploy on a Cluster
+### Deploy Gateway Sidecar on a Cluster
 
 Update the chart values file called `yourvaluesfile.yaml` that you have previously created.
 Refer to the [values.yaml](https://github.com/kubeslice/charts/blob/master/charts/kubeslice-worker/values.yaml) to create `yourvaluesfiel.yaml` and update the gateway-sidecar image subsection to use the local image.
