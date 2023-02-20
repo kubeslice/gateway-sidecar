@@ -49,7 +49,7 @@ helm repo update
    ```
 
 2. Edit the `VERSION` variable in the Makefile to change the docker tag to be built.
-   Image is set as `docker.io/aveshasystems/kubeslice-gw-sidecar:$(VERSION)` in the Makefile. Change this if required
+   The image is set as `docker.io/aveshasystems/kubeslice-gw-sidecar:$(VERSION)` in the Makefile. Change this if required
 
    ```
    make docker-build
