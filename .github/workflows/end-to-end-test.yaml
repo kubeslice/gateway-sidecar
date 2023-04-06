@@ -158,7 +158,7 @@ jobs:
        username: ${{secrets.MAIL_USERNAME}}
        password: ${{secrets.MAIL_PASSWORD}}
        cc: rajendra@aveshasystems.com, eric@aveshasystems.com, abhisek@aveshasystems.com
-       subject: Gateway-sidecar | end-to-end-test | ${{ steps.date.outputs.date }}
+       subject: Gateway-sidecar | gateway-end-to-end-test | ${{ steps.date.outputs.date }}
        to: richie@aveshasystems.com, nishant.singh@aveshasystems.com
        from: no-reply@aveshasystems.com
        attachments: result-summary.txt
