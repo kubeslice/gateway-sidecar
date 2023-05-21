@@ -29,7 +29,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-//create latency metrics which has to be populated when we receive latency from tunnel
+// create latency metrics which has to be populated when we receive latency from tunnel
 var (
 	sourceClusterId = os.Getenv("CLUSTER_ID")
 	remoteClusterId = os.Getenv("REMOTE_CLUSTER_ID")
@@ -50,7 +50,7 @@ var (
 	log            *logger.Logger = logger.NewLogger()
 )
 
-//common method get gauge metrics alongwith labels
+// common method get gauge metrics alongwith labels
 func getGaugeMetrics(name string, help string) prometheus.Gauge {
 	return prometheus.NewGauge(
 		prometheus.GaugeOpts{
@@ -61,7 +61,7 @@ func getGaugeMetrics(name string, help string) prometheus.Gauge {
 		})
 }
 
-//method to register metrics to prometheus
+// method to register metrics to prometheus
 func StartMetricsCollector(metricCollectorPort string) {
 	metricCollectorPort = ":" + metricCollectorPort
 	log.Infof("Starting metric collector @ %s", metricCollectorPort)
@@ -86,7 +86,7 @@ func StartMetricsCollector(metricCollectorPort string) {
 	log.Info("Started Prometheus server at", metricCollectorPort)
 }
 
-//send http request
+// send http request
 func newHandlerWithHistogram(handler http.Handler, histogram *prometheus.HistogramVec) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		start := time.Now()

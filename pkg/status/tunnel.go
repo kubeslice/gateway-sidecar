@@ -87,14 +87,15 @@ func (t *TunnelChecker) Execute(interface{}) (err error) {
 		t.tunStatus = new(TunnelInterfaceStatus)
 		t.startTime = getCurTimeMs()
 	}
-	//add metrics which can be shown on prometheus
-	metrics.RecordLatencyMetric(float64(t.tunStatus.Latency))
-	metrics.RecordRxRateMetric(float64(t.tunStatus.RxRate))
-	metrics.RecordTxRateMetric(float64(t.tunStatus.TxRate))
 
 	t.tunStatus.NetInterface = ifaceInfos[0].Name
 	t.tunStatus.LocalIP = ifaceInfos[0].IP
 	t.updateNetworkStatus(ifaceInfos[0].Name)
+
+	//add metrics which can be shown on prometheus
+	metrics.RecordLatencyMetric(float64(t.tunStatus.Latency))
+	metrics.RecordRxRateMetric(float64(t.tunStatus.RxRate))
+	metrics.RecordTxRateMetric(float64(t.tunStatus.TxRate))
 	return nil
 }
 
@@ -206,6 +207,7 @@ func (t *TunnelChecker) updateNetworkStatus(ifaceName string) error {
 	txCmd := fmt.Sprintf("cat /sys/class/net/%s/statistics/tx_bytes", ifaceName)
 	rxCmd := fmt.Sprintf("cat /sys/class/net/%s/statistics/rx_bytes", ifaceName)
 	var txBytes, rxBytes uint64 = 0, 0
+	t.startTime = getCurTimeMs()
 	cmdOut, err := cmd.Run(txCmd)
 	if err != nil {
 		errStr := fmt.Sprintf("Command: %v execution failed with err: %v and stderr : %v", txCmd, err, cmdOut)
@@ -239,13 +241,14 @@ func (t *TunnelChecker) updateNetworkStatus(ifaceName string) error {
 		return nil
 	}
 
-	t.tunStatus.TxRate = uint64(((txBytes - t.txBytes) / uint64(timeDelta)) * 8)
-	t.tunStatus.RxRate = uint64(((rxBytes - t.rxBytes) / uint64(timeDelta)) * 8)
+	// Multiplied by 8 to convert bytes to bits, Multiplied by 1000 to convert bits per milliseconds to bits per second
+	// Using float64 during calculation to avoid losing precision during division
+	t.tunStatus.TxRate = uint64(8 * float64(txBytes-t.txBytes) * 1000 / float64(timeDelta))
+	t.tunStatus.RxRate = uint64(8 * float64(rxBytes-t.rxBytes) * 1000 / float64(timeDelta))
 	t.log.Infof("TxRate: %v RxRate: %v", t.tunStatus.TxRate, t.tunStatus.RxRate)
 	t.log.Infof("Latency :%v\t Packet Loss:%v\t PeerIP:%v", t.tunStatus.Latency, t.tunStatus.PacketLoss, t.tunStatus.PeerIP)
 	t.txBytes = txBytes
 	t.rxBytes = rxBytes
-	t.startTime = getCurTimeMs()
 	return nil
 }
 
