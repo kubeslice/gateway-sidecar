@@ -42,6 +42,7 @@ var (
 		"source_gateway_id":       sourceGatewayId,
 		"remote_gateway_id":       remoteGatewayId,
 	}
+	TunnelUP       *prometheus.GaugeVec
 	LatencyMetrics *prometheus.GaugeVec
 	RxRateMetrics  *prometheus.GaugeVec
 	TxRateMetrics  *prometheus.GaugeVec
@@ -59,6 +60,9 @@ func StartMetricsCollector(metricCollectorPort string) {
 		ReportingController: "gateway-sidecar",
 	})
 
+	TunnelUP = mf.NewGauge("slicegateway_tunnel_up", "Slicegateway VPN tunnel status",
+		[]string{"slice", "source_gateway_id", "source_slice_cluster_id", "remote_gateway_id", "remote_slice_cluster_id"},
+	).MustCurryWith(constlabels)
 	LatencyMetrics = mf.NewGauge("slicegateway_tunnel_latency", "Latency between slice gateways in milliseconds",
 		[]string{"slice", "source_gateway_id", "source_slice_cluster_id", "remote_gateway_id", "remote_slice_cluster_id"},
 	).MustCurryWith(constlabels)

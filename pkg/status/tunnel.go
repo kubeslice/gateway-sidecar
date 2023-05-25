@@ -76,11 +76,19 @@ func (t *TunnelChecker) Execute(interface{}) (err error) {
 	if err != nil {
 		t.tunStatus = nil
 		t.log.Errorf("Unable to find the tun interface")
+		metrics.TunnelUP.WithLabelValues().Set(0)
+		metrics.LatencyMetrics.WithLabelValues().Set(0)
+		metrics.RxRateMetrics.WithLabelValues().Set(0)
+		metrics.TxRateMetrics.WithLabelValues().Set(0)
 		return err
 	}
 	if len(ifaceInfos) > 1 || len(ifaceInfos) == 0 {
 		t.tunStatus = nil
 		t.log.Errorf("Invalid tunnel interface")
+		metrics.TunnelUP.WithLabelValues().Set(0)
+		metrics.LatencyMetrics.WithLabelValues().Set(0)
+		metrics.RxRateMetrics.WithLabelValues().Set(0)
+		metrics.TxRateMetrics.WithLabelValues().Set(0)
 		return errors.New("Invalid tunnel interface")
 	}
 	if t.tunStatus == nil {
@@ -96,6 +104,7 @@ func (t *TunnelChecker) Execute(interface{}) (err error) {
 	metrics.LatencyMetrics.WithLabelValues().Set(float64(t.tunStatus.Latency))
 	metrics.RxRateMetrics.WithLabelValues().Set(float64(t.tunStatus.RxRate))
 	metrics.TxRateMetrics.WithLabelValues().Set(float64(t.tunStatus.TxRate))
+	metrics.TunnelUP.WithLabelValues().Set(1.0)
 	return nil
 }
 
