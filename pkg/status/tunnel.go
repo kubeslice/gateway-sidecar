@@ -93,9 +93,9 @@ func (t *TunnelChecker) Execute(interface{}) (err error) {
 	t.updateNetworkStatus(ifaceInfos[0].Name)
 
 	//add metrics which can be shown on prometheus
-	metrics.RecordLatencyMetric(float64(t.tunStatus.Latency))
-	metrics.RecordRxRateMetric(float64(t.tunStatus.RxRate))
-	metrics.RecordTxRateMetric(float64(t.tunStatus.TxRate))
+	metrics.LatencyMetrics.WithLabelValues().Set(float64(t.tunStatus.Latency))
+	metrics.RxRateMetrics.WithLabelValues().Set(float64(t.tunStatus.RxRate))
+	metrics.TxRateMetrics.WithLabelValues().Set(float64(t.tunStatus.TxRate))
 	return nil
 }
 
