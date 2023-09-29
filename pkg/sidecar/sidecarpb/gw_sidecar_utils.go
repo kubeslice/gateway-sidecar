@@ -67,16 +67,16 @@ func getGwPodStatus() (*GwPodStatus, error) {
 	if statusMonitor != nil {
 		// Get the monitor status checks
 		checks := statusMonitor.Checks()
-		log.Info("checks","checks",checks)
+		log.Info("checks", "checks", checks)
 		for _, v := range checks {
 			stats, err := v.Status()
-			log.Info("stats","stats ",stats)
+			log.Info("stats", "stats ", stats)
 			if err != nil {
 				// this means that tunnel is not established
 				tunnelStatus.Status = TunnelStatusType_GW_TUNNEL_STATE_DOWN
 				podStatus.TunnelStatus = &tunnelStatus
 				log.Infof("pod status : %v", podStatus)
-				return podStatus,nil
+				return podStatus, nil
 			}
 			tunnelStatus = TunnelInterfaceStatus{
 				NetInterface: stats.NetInterface,

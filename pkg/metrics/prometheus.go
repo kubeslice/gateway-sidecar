@@ -18,18 +18,16 @@
 package metrics
 
 import (
-	"fmt"
-	"math/rand"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/kubeslice/gateway-sidecar/pkg/logger"
+	"github.com/kubeslice/kubeslice-monitoring/pkg/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-//create latency metrics which has to be populated when we receive latency from tunnel
+// create latency metrics which has to be populated when we receive latency from tunnel
 var (
 	sourceClusterId = os.Getenv("CLUSTER_ID")
 	remoteClusterId = os.Getenv("REMOTE_CLUSTER_ID")
@@ -38,70 +36,51 @@ var (
 	sliceName       = os.Getenv("SLICE_NAME")
 	namespace       = "kubeslice_system"
 	constlabels     = prometheus.Labels{
-		"slice_name":              sliceName,
+		"slice":                   sliceName,
 		"source_slice_cluster_id": sourceClusterId,
 		"remote_slice_cluster_id": remoteClusterId,
 		"source_gateway_id":       sourceGatewayId,
 		"remote_gateway_id":       remoteGatewayId,
 	}
-	LatencyMetrics                = getGaugeMetrics("slicegw_latency", "latency Metrics From Slice Gateway")
-	RxRateMetrics                 = getGaugeMetrics("rx_rate", "Rx rate from Slice Gateway.")
-	TxRateMetrics                 = getGaugeMetrics("tx_rate", "Tx rate from Slice Gateway.")
+	TunnelUP       *prometheus.GaugeVec
+	LatencyMetrics *prometheus.GaugeVec
+	RxRateMetrics  *prometheus.GaugeVec
+	TxRateMetrics  *prometheus.GaugeVec
 	log            *logger.Logger = logger.NewLogger()
 )
 
-//common method get gauge metrics alongwith labels
-func getGaugeMetrics(name string, help string) prometheus.Gauge {
-	return prometheus.NewGauge(
-		prometheus.GaugeOpts{
-			Namespace:   namespace,
-			Name:        name,
-			Help:        help,
-			ConstLabels: constlabels,
-		})
-}
-
-//method to register metrics to prometheus
+// method to register metrics to prometheus
 func StartMetricsCollector(metricCollectorPort string) {
 	metricCollectorPort = ":" + metricCollectorPort
 	log.Infof("Starting metric collector @ %s", metricCollectorPort)
-	rand.Seed(time.Now().Unix())
-	histogramVec := prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Name: "prom_request_time",
-		Help: "Time it has taken to retrieve the metrics",
-	}, []string{"time"})
 
-	prometheus.Register(histogramVec)
+	http.Handle("/metrics", promhttp.Handler())
 
-	prometheus.MustRegister(LatencyMetrics)
-	prometheus.MustRegister(RxRateMetrics)
-	prometheus.MustRegister(TxRateMetrics)
+	mf, err := metrics.NewMetricsFactory(prometheus.DefaultRegisterer, metrics.MetricsFactoryOptions{
+		ReportingController: "gateway-sidecar",
+	})
 
-	http.Handle("/metrics", newHandlerWithHistogram(promhttp.Handler(), histogramVec))
+	TunnelUP = mf.NewGauge("slicegateway_tunnel_up", "Slicegateway VPN tunnel status",
+		[]string{"slice", "source_gateway_id", "source_slice_cluster_id", "remote_gateway_id", "remote_slice_cluster_id"},
+	).MustCurryWith(constlabels)
+	LatencyMetrics = mf.NewGauge("slicegateway_tunnel_latency", "Latency between slice gateways in milliseconds",
+		[]string{"slice", "source_gateway_id", "source_slice_cluster_id", "remote_gateway_id", "remote_slice_cluster_id"},
+	).MustCurryWith(constlabels)
+	TxRateMetrics = mf.NewGauge("slicegateway_tunnel_txrate", "Transfer rate between slice gateways in bits per second",
+		[]string{"slice", "source_gateway_id", "source_slice_cluster_id", "remote_gateway_id", "remote_slice_cluster_id"},
+	).MustCurryWith(constlabels)
+	RxRateMetrics = mf.NewGauge("slicegateway_tunnel_rxrate", "Receive rate between slice gateways in bits per second",
+		[]string{"slice", "source_gateway_id", "source_slice_cluster_id", "remote_gateway_id", "remote_slice_cluster_id"},
+	).MustCurryWith(constlabels)
 
-	err := http.ListenAndServe(metricCollectorPort, nil)
+	if err != nil {
+		log.Error("unable to initializ metrics factory")
+		os.Exit(1)
+	}
+
+	err = http.ListenAndServe(metricCollectorPort, nil)
 	if err != nil {
 		log.Errorf("Failed to start metric collector @ %s", metricCollectorPort)
 	}
 	log.Info("Started Prometheus server at", metricCollectorPort)
-}
-
-//send http request
-func newHandlerWithHistogram(handler http.Handler, histogram *prometheus.HistogramVec) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		start := time.Now()
-		status := http.StatusOK
-
-		defer func() {
-			histogram.WithLabelValues(fmt.Sprintf("%d", status)).Observe(time.Since(start).Seconds())
-		}()
-
-		if req.Method == http.MethodGet {
-			handler.ServeHTTP(w, req)
-			return
-		}
-		status = http.StatusBadRequest
-
-		w.WriteHeader(status)
-	})
 }
