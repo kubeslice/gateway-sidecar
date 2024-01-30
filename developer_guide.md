@@ -3,17 +3,15 @@
 The Slice VPN Gateway is a slice network service component that provides a secure VPN tunnel between any two clusters that are a part of the slice.
 
 ## Building and Installing `gateway-sidecar` in a Local Kind Cluster
-For more information, see [getting started with kind clusters](https://docs.avesha.io/documentation/open-source/0.2.0/getting-started-with-kind-clusters).
+For more information, see [getting started with clusters](https://kubeslice.io/documentation/open-source/1.2.0/category/get-started).
 
 ### Setting up Development Environment
-
-* Go (version 1.17 or later) installed and configured in your machine ([Installing Go](https://go.dev/dl/))
-* Docker installed and running in your local machine
-* A running [`kind`](https://kind.sigs.k8s.io/)  cluster
-* [`kubectl`](https://kubernetes.io/docs/tasks/tools/) installed and configured
-* Follow the getting started from above, to install [kubeslice-controller](https://github.com/kubeslice/kubeslice-controller) 
-
-
+Ensure that: 
+* Go (version 1.17 or later) is installed and configured in your machine ([Installing Go](https://go.dev/dl/)).
+* Docker is installed and running in your local machine
+* You have a running [`kind`](https://kind.sigs.k8s.io/) cluster
+* [`kubectl`](https://kubernetes.io/docs/tasks/tools/)  is installed and configured on the cluster.
+* You follow the getting started from above to install [kubeslice-controller](https://github.com/kubeslice/kubeslice-controller).
 
 ### Building Docker Images
 
@@ -62,14 +60,14 @@ Update chart values file `yourvaluesfile.yaml` that you have previously created.
 Refer to [values.yaml](https://github.com/kubeslice/charts/blob/master/charts/kubeslice-worker/values.yaml) to create `yourvaluesfile.yaml` and update the routerSidecar image subsection to use the local image.
 
 From the sample:
-
+Change the following parameter values
 ```
 routerSidecar:
   image: docker.io/aveshasystems/gw-sidecar
   tag: 0.1.0
 ```
 
-Change it to:
+Change them to:
 
 ```
 routerSidecar:
@@ -90,11 +88,11 @@ kubectl describe pod <gateway pod name> -n kubeslice-system
 ```
 ### Uninstalling the kubeslice-worker
 
-Refer to the [uninstall guide](https://docs.avesha.io/documentation/open-source/0.2.0/getting-started-with-kind-clusters)
+Refer to the [uninstallation guide](https://kubeslice.io/documentation/open-source/1.2.0/uninstall-kubeslice/).
 
-1. [Offboard](https://docs.avesha.io/documentation/open-source/0.2.0/getting-started-with-cloud-clusters/uninstalling-kubeslice/offboarding-namespaces) the namespaces from the slice.
+1. [Offboard](https://kubeslice.io/documentation/open-source/1.2.0/uninstall-kubeslice/#offboard-application-namespaces) the namespaces from the slice.
 
-2. [Delete](https://docs.avesha.io/documentation/open-source/0.2.0/getting-started-with-cloud-clusters/uninstalling-kubeslice/deleting-the-slice) the slice.
+2. [Delete](https://kubeslice.io/documentation/open-source/1.2.0/uninstall-kubeslice/#delete-slices) the slice.
 
 3. On the worker cluster, undeploy the kubeslice-worker charts.
 
