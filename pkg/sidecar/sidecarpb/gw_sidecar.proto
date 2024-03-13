@@ -110,6 +110,7 @@ message GwPodStatus {
     TunnelInterfaceStatus tunnelStatus    = 4;
     // NSM Interface Status
     NsmInterfaceStatus  nsmIntfStatus     = 5;
+    Error error                           = 6;
 }
 
 // RemoteGwVpnIP represents remote SliceGwPod VPN IP
@@ -147,6 +148,13 @@ message SliceGwConnectionContext {
     // Remote slice gateway Node Port
     string remoteSliceGwNodePort = 13;
 }
+// Error is the generic error type which has
+// a message and code to identify error
+message Error {
+    string code     = 1;
+    string message  = 2;
+}
+
 
 service GwSidecarService {
     // The Interface to get the Pod status.
