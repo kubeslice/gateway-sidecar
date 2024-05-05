@@ -2,7 +2,7 @@
 
 Guidelines on how to contribute to KubeSlice
 
-There are a number of ways you can contribute to the KubeSlice project. We would like to accept your patches and contributions to the KubeSlice code base. This document provides guidelines on how to contribute to the KubeSlice code base. We require all participants to adhere to the [Code of Conduct](https://github.com/kubeslice/kubeslice-controller/blob/master/code_of_conduct.md).
+There are a number of ways you can contribute to the KubeSlice project. We would like to accept your patches and contributions to the KubeSlice code base. This document provides guidelines on how to contribute to the KubeSlice code base. We require all participants to adhere to the [Code of Conduct](https://github.com/kubeslice/gateway-sidecar/blob/master/code_of_conduct.md).
 
 
 Here are some ways to contribute:
@@ -26,7 +26,7 @@ A signed commit is a commit where the commit message contains the following cont
 This can be done by adding `--signoff` to your git command line
 
 ## Code of Conduct
-Please make sure to read and observe our [Code of Conduct](https://github.com/kubeslice/kubeslice-controller/blob/master/code_of_conduct.md).
+Please make sure to read and observe our [Code of Conduct](https://github.com/kubeslice/gateway-sidecar/blob/master/code_of_conduct.md).
 
 ## Contributor Workflow
 
