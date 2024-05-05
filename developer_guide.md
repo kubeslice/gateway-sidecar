@@ -17,42 +17,38 @@ Ensure that:
 
 1. Clone the latest version of kubeslice-controller from  the master branch.
 
-bash
+```
 git clone https://github.com/kubeslice/gateway-sidecar.git
 cd gateway-sidecar
+```
 
 
 2. Adjust image name variable IMG in the [Makefile](Makefile) to change the docker tag to be built.
    The default image is set as IMG ?= aveshasystems/kubeslice-gw-sidecar:${VERSION}. Modify this if required.
-
-bash
+```
 make docker-build
-
+```
 ### Running Local Image on Kind Clusters
 
 1. You can load the gateway-sidecar docker image into the kind cluster.
-
-bash
+```
 kind load docker-image my-custom-image:unique-tag --name clustername
-
+```
 
 Example
-
-console
+```
 kind load docker-image aveshasystems/kubeslice-gw-sidecar:1.2.1 --name kind
-
+```
 
 2. Check the loaded image in the cluster. Modify the node name if required.
-
-console
+```
 docker exec -it <node-name> crictl images
-
+```
 
 Example.
-
-console
+```
 docker exec -it kind-control-plane crictl images
-
+```
 
 ### Deploy in a Cluster
 
@@ -61,31 +57,29 @@ Refer to [values.yaml](https://github.com/kubeslice/charts/blob/master/charts/ku
 
 From the sample:
 Change the following parameter values
-
-routerSidecar:
+```
+gatewaySidecar:
   image: docker.io/aveshasystems/gw-sidecar
   tag: 0.1.0
-
+```
 
 Change them to:
 
-
-routerSidecar:
+```
+gatewaySidecar:
   image: <my-custom-image>
   tag: <unique-tag>
-
+```
 
 Deploy the Updated Chart
-
-console
+```
 make chart-deploy VALUESFILE=yourvaluesfile.yaml
-
+```
 
 ### Verify the gateway-sidecar Pods are Running
-
-bash
+```
 kubectl describe pod <gateway pod name> -n kubeslice-system
-
+```
 ### Uninstalling the kubeslice-worker
 
 Refer to the [uninstallation guide](https://kubeslice.io/documentation/open-source/1.2.0/uninstall-kubeslice/).
@@ -96,10 +90,11 @@ Refer to the [uninstallation guide](https://kubeslice.io/documentation/open-sour
 
 3. On the worker cluster, undeploy the kubeslice-worker charts.
 
-bash
-# uninstall all the resources
-make chart-undeploy
 
+# uninstall all the resources
+```
+make chart-undeploy
+```
 
 ## License
 
