@@ -10,6 +10,5 @@ jobs:
     steps:
       - uses: docker/build-push-action@v2
         with:
-          file: unit_tests.dockerfile
-          tags: test-image:latest
+          tags: gateway-sidecar:latest
           push: false
