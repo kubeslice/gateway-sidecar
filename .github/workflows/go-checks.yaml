@@ -1,0 +1,29 @@
+name: go-checks
+on:  
+  push: 
+    branches:
+      - master
+  pull_request:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout the repo
+        uses: actions/checkout@v2
+      - uses: Jerome1337/gofmt-action@v1.0.4
+        name: check go fmt
+        with:
+          gofmt-path: './'
+          gofmt-flags: '-l -d'
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+  
+      - name: Build
+        run: go build -v ./...
+  
+      - name: Test
+        run: go test -v ./...
