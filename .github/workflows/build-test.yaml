@@ -1,14 +1,25 @@
-name: build-test
-on:  
-  push: 
+name: Build Docker Image Test
+
+on:
+  push:
     branches:
       - master
   pull_request:
+
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: docker/build-push-action@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v2
         with:
-          tags: gateway-sidecar:latest
+          context: .
           push: false
+          tags: gateway-sidecar:latest
+          build-args: |
+            PLATFORM=amd64
+          file: Dockerfile
