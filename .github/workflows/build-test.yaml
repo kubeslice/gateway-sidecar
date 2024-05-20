@@ -1,9 +1,9 @@
 name: build-test
-  pull_request:
+on:  
+  push: 
     branches:
-    - 'master'
-    - 'release-*'
-    - 'dev'
+      - master
+  pull_request:
 jobs:
   test:
     runs-on: ubuntu-latest
