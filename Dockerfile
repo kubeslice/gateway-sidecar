@@ -19,7 +19,7 @@
 
 ARG PLATFORM
 
-FROM ${PLATFORM}/golang:1.17.7-alpine3.15 as gobuilder
+FROM ${PLATFORM}/golang:1.22.5-alpine3.20 AS gobuilder
 
 # Install git.
 
@@ -42,7 +42,7 @@ RUN go mod download &&\
 
 # Build reduced image from base alpine
 
-FROM ${PLATFORM}/alpine:3.15
+FROM ${PLATFORM}/alpine:3.20.2
 
 # tc - is needed for traffic control and shaping on the sidecar.  it is part of the iproute2
 
