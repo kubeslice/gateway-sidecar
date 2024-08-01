@@ -28,6 +28,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type GwSidecar struct {
@@ -73,10 +74,16 @@ func (s *GwSidecar) GetSliceGwRemotePodName(ctx context.Context, remoteGwVpnIP *
 	}
 	defer conn.Close()
 	client := NewGwSidecarServiceClient(conn)
-	res, err := client.GetStatus(context.Background(), &empty.Empty{})
+	res, err := client.GetStatus(context.Background(), new(emptypb.Empty))
 	if err != nil {
 		fmt.Println("err:", err.Error())
 		status.Errorf(codes.InvalidArgument, "Unable to get the remote pod status")
+		return &GwPodStatus{
+			Error: &Error{
+				Code:    "5001",
+				Message: err.Error(),
+			},
+		}, err
 	}
 	log.Info("recieved response from remote cluster", res)
 	return res, nil
