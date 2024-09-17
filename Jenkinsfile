@@ -6,5 +6,6 @@ dockerImagePipeline(
   pushed: true,
   buildArgumentsList: [
     [ENV: 'production', PLATFORM: 'linux/arm64,linux/amd64']
-]  
+]
+  
 )
