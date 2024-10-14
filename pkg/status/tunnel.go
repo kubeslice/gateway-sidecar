@@ -89,6 +89,7 @@ func (t *TunnelChecker) Execute(interface{}) (err error) {
 	}
 	//add metrics which can be shown on prometheus
 	metrics.RecordLatencyMetric(float64(t.tunStatus.Latency))
+	metrics.RecordPktLossMetric(float64(t.tunStatus.PacketLoss))
 	metrics.RecordRxRateMetric(float64(t.tunStatus.RxRate))
 	metrics.RecordTxRateMetric(float64(t.tunStatus.TxRate))
 
@@ -228,7 +229,8 @@ func (t *TunnelChecker) updateNetworkStatus(ifaceName string) error {
 	t.log.Debugf("Command: %v output :%v", rxCmd, cmdOut)
 
 	curTime := getCurTimeMs()
-	timeDelta := (curTime - t.startTime) * 1000
+	// Get time delta in seconds
+	timeDelta := (curTime - t.startTime) / 1000
 	t.log.Debugf("Current time: %v Start Time : %v timeDelta: %v prev txBytes: %v prev rxBytes: %v cur txBytes: %v cur rxBytes: %v", curTime, t.startTime, timeDelta, t.txBytes, t.rxBytes, txBytes, rxBytes)
 	if (txBytes - t.txBytes) < 0 {
 		t.log.Errorf("Negative txBytes ")
