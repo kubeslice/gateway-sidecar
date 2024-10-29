@@ -5,8 +5,8 @@ The Slice VPN Gateway is a slice network service component that provides a secur
 ## Get Started
 
 Please refer to our documentation on:
-- [Get Started on KubeSlice](https://kubeslice.io/documentation/open-source/1.3.0/category/get-started)
-- [Install KubeSlice](https://kubeslice.io/documentation/open-source/1.3.0/category/install-kubeslice)
+- [Get Started on KubeSlice](https://kubeslice.io/documentation/open-source/latest/category/get-started)
+- [Install KubeSlice](https://kubeslice.io/documentation/open-source/latest/category/install-kubeslice)
 
 
 ### Prerequisites
@@ -29,13 +29,13 @@ docker pull aveshasystems/gw-sidecar:latest
 
 ## Set up Your Helm Repo
 
-If you have not added avesha helm repo yet, add it.
+If you have not added Avesha's `helm repo` yet, add it.
 
 ```console
 helm repo add avesha https://kubeslice.github.io/charts/
 ```
 
-Upgrade the avesha helm repo.
+Upgrade Avesha's `helm repo`.
 
 ```console
 helm repo update
@@ -69,7 +69,7 @@ helm repo update
    kind load docker-image aveshasystems/kubeslice-gw-sidecar:1.2.1 --name kind
    ```
 
-2. Check the loaded image in the cluster. Modify the node name if required.
+2. Check the loaded image in the cluster. Modify the node name as required.
 
    ```console
    docker exec -it <node-name> crictl images
