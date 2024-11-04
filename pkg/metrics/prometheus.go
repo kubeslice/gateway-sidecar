@@ -47,8 +47,9 @@ var (
 		"remote_gateway_id":       remoteGatewayId,
 	}
 	LatencyMetrics                = getGaugeMetrics("slicegw_latency", "latency Metrics From Slice Gateway")
-	RxRateMetrics                 = getGaugeMetrics("rx_rate", "Rx rate from Slice Gateway.")
-	TxRateMetrics                 = getGaugeMetrics("tx_rate", "Tx rate from Slice Gateway.")
+	PktLossMetrics                = getGaugeMetrics("slicegw_pkt_loss", "pkt loss Metrics From Slice Gateway")
+	RxRateMetrics                 = getGaugeMetrics("slicegw_rx_rate", "Rx rate from Slice Gateway.")
+	TxRateMetrics                 = getGaugeMetrics("slicegw_tx_rate", "Tx rate from Slice Gateway.")
 	log            *logger.Logger = logger.NewLogger()
 )
 
@@ -76,6 +77,7 @@ func StartMetricsCollector(metricCollectorPort string) {
 	prometheus.Register(histogramVec)
 
 	prometheus.MustRegister(LatencyMetrics)
+	prometheus.MustRegister(PktLossMetrics)
 	prometheus.MustRegister(RxRateMetrics)
 	prometheus.MustRegister(TxRateMetrics)
 
