@@ -229,8 +229,9 @@ func (t *TunnelChecker) updateNetworkStatus(ifaceName string) error {
 	t.log.Debugf("Command: %v output :%v", rxCmd, cmdOut)
 
 	curTime := getCurTimeMs()
-	// Get time delta in seconds
-	timeDelta := (curTime - t.startTime) / 1000
+	// The ping interval is one second. So the time delta could sometimes be a little less than one second that could
+	// cause a divide by zero error while calculating the tx and rx rate. Hence recording the rates in terms of bytes per ms.
+	timeDelta := (curTime - t.startTime)
 	t.log.Debugf("Current time: %v Start Time : %v timeDelta: %v prev txBytes: %v prev rxBytes: %v cur txBytes: %v cur rxBytes: %v", curTime, t.startTime, timeDelta, t.txBytes, t.rxBytes, txBytes, rxBytes)
 	if (txBytes - t.txBytes) < 0 {
 		t.log.Errorf("Negative txBytes ")
