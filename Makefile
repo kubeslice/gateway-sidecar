@@ -1,6 +1,6 @@
 # VERSION defines the project version for the bundle.
 # Update this value when you upgrade the version of your project.
-VERSION ?= latest-stable
+VERSION ?= latest-test
 
 .PHONY: proto
 proto: ##generate the proto files
