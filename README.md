@@ -8,7 +8,6 @@ Please refer to our documentation on:
 - [Get Started on KubeSlice](https://kubeslice.io/documentation/open-source/latest/category/get-started)
 - [Install KubeSlice](https://kubeslice.io/documentation/open-source/latest/category/install-kubeslice)
 
-
 ### Prerequisites
 Before you begin, make sure the following prerequisites are met:
 * Docker is installed and running on your local machine.
