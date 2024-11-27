@@ -24,9 +24,9 @@ func RecordLatencyMetric(latency float64) {
 }
 
 // Records packet loss for this sidecar
-func RecordPktLossMetric(latency float64) {
+func RecordPktLossMetric(pktloss float64) {
 	// Set Pkt Loss Gauge in prometheus
-	LatencyMetrics.Set(latency)
+	PktLossMetrics.Set(pktloss)
 }
 
 // Records rx bytes for this sidecar
