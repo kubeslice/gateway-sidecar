@@ -88,7 +88,9 @@ func getGwPodStatus() (*GwPodStatus, error) {
 				PacketLoss:   stats.PacketLoss,
 				Status:       TunnelStatusType_GW_TUNNEL_STATE_UP,
 			}
-			if tunnelStatus.PacketLoss > 80 || tunnelStatus.NetInterface == "" {
+			// Set the state of the tunnel to down only if there are contiguous instances (recorded by the
+			// stats.TotalPktLossIter counter) of total and complete, i.e 100%, pkt loss.
+			if stats.PacketLoss == 100 && stats.TotalPktLossIter >= status.GUARANTEED_PKTLOSS_COUNT {
 				tunnelStatus.Status = TunnelStatusType_GW_TUNNEL_STATE_DOWN
 			}
 
