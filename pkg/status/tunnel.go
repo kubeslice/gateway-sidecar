@@ -193,9 +193,24 @@ func (t *TunnelChecker) onFinishCb(stats *ping.Statistics) {
 	if t.tunStatus != nil {
 		t.tunStatus.Lock()
 		defer t.tunStatus.Unlock()
+		// Check if the pkt loss is 100%. For a prolonged instance of total and complete
+		// packet loss, increment the counter till MAX_PKTLOSS_COUNT and
+		// circle back to GUARANTEED_PKTLOSS_COUNT.
+		// Reset the count if pkt loss is less than 100%.
+		if stats.PacketLoss == 100 {
+			if t.tunStatus.TotalPktLossIter == MAX_PKTLOSS_COUNT {
+				t.tunStatus.TotalPktLossIter = GUARANTEED_PKTLOSS_COUNT
+			} else {
+				t.tunStatus.TotalPktLossIter++
+				t.log.Infof("BBH: incr pkt loss iter: %v", t.tunStatus.TotalPktLossIter)
+			}
+		} else {
+			t.tunStatus.TotalPktLossIter = 0
+		}
 		t.tunStatus.PacketLoss = uint64(stats.PacketLoss)
 		t.tunStatus.Latency = uint64(stats.AvgRtt / time.Millisecond)
-		t.log.Infof("Latency :%v\t Packet Loss:%v\t", t.tunStatus.Latency, t.tunStatus.PacketLoss)
+		t.log.Infof("Latency :%v, Packet Loss:%v, ContiguousTotalPktLossCount: %v",
+			t.tunStatus.Latency, t.tunStatus.PacketLoss, t.tunStatus.TotalPktLossIter)
 		if t.exMod != nil {
 			t.exMod.SendMsg(&tunnelMessage{ty: RestartPinger, msg: nil})
 		}
