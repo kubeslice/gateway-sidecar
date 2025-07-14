@@ -47,7 +47,7 @@ var (
 // it creates the required directory structure for openvpn pods
 func bootstrapGwPod(wg *sync.WaitGroup) error {
 	var tunCheck *status.TunnelChecker
-	gwPod := bootstrap.NewGatewayPod(os.Getenv("OPEN_VPN_MODE"), os.Getenv("MOUNT_PATH"), SECRET_MOUNT_PATH, log)
+	gwPod := bootstrap.NewGatewayPod(os.Getenv("VPN_MODE"), os.Getenv("MOUNT_PATH"), SECRET_MOUNT_PATH, log)
 	if err := gwPod.Process(); err != nil {
 		log.Errorf("Error bootstraping gw pod", err.Error())
 		return err
