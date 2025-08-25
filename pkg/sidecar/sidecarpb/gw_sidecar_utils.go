@@ -167,6 +167,11 @@ func updateGwStatusWithConContext(conContext *SliceGwConnectionContext) error {
 	log.Infof("conContext : %v", conContext)
 	var errVal error = nil
 
+	if statusMonitor == nil {
+		log.Error("statusMonitor is nil, cannot perform status checks")
+		return errors.New("internal error: status monitor is uninitialized")
+	}
+
 	for k, v := range statusMonitor.Checks() {
 		switch k {
 		case "TunnelCheck":
