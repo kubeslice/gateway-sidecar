@@ -19,6 +19,7 @@ package status
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -72,10 +73,16 @@ func NewTunnelChecker(log *logger.Logger) Check {
 
 // Execute executes the Tunnel status check
 func (t *TunnelChecker) Execute(interface{}) (err error) {
-	ifaceInfos, err := nettools.GetInterfaceInfos("tun")
+	var vpnPrefixName string
+	if os.Getenv("VPN_TYPE") == "OpenVPN" {
+		vpnPrefixName = "tun"
+	} else {
+		vpnPrefixName = "wg"
+	}
+	ifaceInfos, err := nettools.GetInterfaceInfos(vpnPrefixName)
 	if err != nil {
 		t.tunStatus = nil
-		t.log.Errorf("Unable to find the tun interface")
+		t.log.Errorf("Unable to find the %s interface", vpnPrefixName)
 		return err
 	}
 	if len(ifaceInfos) > 1 || len(ifaceInfos) == 0 {
