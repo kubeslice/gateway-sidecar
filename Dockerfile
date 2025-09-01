@@ -42,14 +42,19 @@ RUN go mod download && \
 
 FROM alpine:3.21
 
-# tc - is needed for traffic control and shaping on the sidecar.  it is part of the iproute2
+# Creating a non-root user
+RUN adduser -D myuser
 
+# tc - is needed for traffic control and shaping on the sidecar.  it is part of the iproute2
+# Install necessary packages
 RUN apk add --no-cache ca-certificates \
     iproute2
 
-# Copy our static executable.
+# Switching to the non-root user
+USER myuser
 
-COPY --from=gobuilder bin/kubeslice-gw-sidecar .
+# Copy our static executable.
+COPY --from=gobuilder --chown=myuser:myuser bin/kubeslice-gw-sidecar .
 
 EXPOSE 5000
 
