@@ -111,7 +111,23 @@ func (t *TunnelChecker) Status() (details *TunnelInterfaceStatus, err error) {
 	if t.tunStatus == nil {
 		return nil, errors.New("Tunnel is not Up")
 	}
-	return t.tunStatus, nil
+	// Lock to safely read the status fields that are updated asynchronously by ping callbacks
+	t.tunStatus.Lock()
+	defer t.tunStatus.Unlock()
+	
+	// Return a copy of the status to avoid race conditions
+	statusCopy := &TunnelInterfaceStatus{
+		NetInterface:     t.tunStatus.NetInterface,
+		LocalIP:          t.tunStatus.LocalIP,
+		PeerIP:           t.tunStatus.PeerIP,
+		Latency:          t.tunStatus.Latency,
+		TxRate:           t.tunStatus.TxRate,
+		RxRate:           t.tunStatus.RxRate,
+		PacketLoss:       t.tunStatus.PacketLoss,
+		Status:           t.tunStatus.Status,
+		TotalPktLossIter: t.tunStatus.TotalPktLossIter,
+	}
+	return statusCopy, nil
 }
 
 // Stop the status of the check
