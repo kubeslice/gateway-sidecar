@@ -121,17 +121,22 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 		SliceGwRemoteClusterNodePort = conContext.GetRemoteSliceGwNodePort()
 	}
 
-	// Add Gateway Route as follows
-	// route add -net  <remote-subnet> netmask <255.255.255.0> gw <remove-vpn-ip>
+	// Add route to remote gateway's NSM subnet via VPN tunnel
 	_, dstIPNet, err := net.ParseCIDR(conContext.GetRemoteSliceGwNsmSubnet())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "Error in Parsing CIDR")
 	}
+	
 	gwIP := net.ParseIP(conContext.GetRemoteSliceGwVpnIP())
-
 	route := netlink.Route{Dst: dstIPNet, Gw: gwIP}
-	log.Infof("RouteAdd args %v, %v ", dstIPNet, gwIP)
-
+	
+	topologyType := conContext.GetTopologyType()
+	if topologyType == "" {
+		topologyType = "full-mesh"
+	}
+	
+	log.Infof("Adding route for topology %s: %v via %v", topologyType, dstIPNet, gwIP)
+	
 	if err := netlink.RouteAdd(&route); err != nil {
 		log.Errorf("Gateway Pod RouteAdd Failed : %v", err)
 	}
