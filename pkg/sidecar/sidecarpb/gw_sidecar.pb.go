@@ -725,6 +725,8 @@ type SliceGwConnectionContext struct {
 	RemoteSliceGwNodeIP string `protobuf:"bytes,12,opt,name=remoteSliceGwNodeIP,proto3" json:"remoteSliceGwNodeIP,omitempty"`
 	// Remote slice gateway Node Port
 	RemoteSliceGwNodePort string `protobuf:"bytes,13,opt,name=remoteSliceGwNodePort,proto3" json:"remoteSliceGwNodePort,omitempty"`
+	// Topology type - full-mesh, custom, or restricted (for logging/metrics only)
+	TopologyType string `protobuf:"bytes,20,opt,name=topologyType,proto3" json:"topologyType,omitempty"`
 }
 
 func (x *SliceGwConnectionContext) Reset() {
@@ -846,6 +848,13 @@ func (x *SliceGwConnectionContext) GetRemoteSliceGwNodeIP() string {
 func (x *SliceGwConnectionContext) GetRemoteSliceGwNodePort() string {
 	if x != nil {
 		return x.RemoteSliceGwNodePort
+	}
+	return ""
+}
+
+func (x *SliceGwConnectionContext) GetTopologyType() string {
+	if x != nil {
+		return x.TopologyType
 	}
 	return ""
 }

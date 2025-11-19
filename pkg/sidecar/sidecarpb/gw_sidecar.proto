@@ -144,11 +144,11 @@ message SliceGwConnectionContext {
     string remoteSliceGwNsmSubnet = 11;
     // Remote slice gateway Node IP
     string remoteSliceGwNodeIP = 12;
-    // Remote slice gateway Node Port
-    string remoteSliceGwNodePort = 13;
-}
-
-service GwSidecarService {
+	// Remote slice gateway Node Port
+	string remoteSliceGwNodePort = 13;
+	// Topology type (for logging/metrics)
+	string topologyType = 20;
+}service GwSidecarService {
     // The Interface to get the Pod status.
     rpc GetStatus(google.protobuf.Empty) returns (GwPodStatus) {}
     // The Interface to get the Remote Gw Pod Name.
