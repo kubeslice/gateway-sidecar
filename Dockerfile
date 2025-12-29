@@ -30,7 +30,13 @@ ARG TARGETARCH
 # Install build dependencies
 # Git is required for fetching the dependencies.
 # build-base is needed for CGO compilation
-RUN apk update && apk add --no-cache git make build-base
+# For cross-compilation, we need the target architecture's toolchain
+RUN apk update && apk add --no-cache git make build-base && \
+    if [ "$TARGETARCH" != "amd64" ]; then \
+        apk add --no-cache gcc-aarch64-linux-gnu g++-aarch64-linux-gnu || \
+        apk add --no-cache crossbuild-essential-arm64 || \
+        echo "Warning: ARM64 cross-compilation toolchain not available via apk"; \
+    fi
 
 WORKDIR /workspace
 
@@ -46,11 +52,21 @@ COPY . .
 
 # Build the binary with cross-compilation support
 # CGO_ENABLED=1 is required for some dependencies (e.g., netlink, syscall)
+# For ARM64 cross-compilation, we need to set CC and CXX to the cross-compiler
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=1 \
-    GOOS=${TARGETOS} \
-    GOARCH=${TARGETARCH} \
-    go build -a -trimpath -ldflags="-w -s" -o bin/kubeslice-gw-sidecar main.go
+    if [ "$TARGETARCH" = "arm64" ]; then \
+        export CC=aarch64-linux-gnu-gcc && \
+        export CXX=aarch64-linux-gnu-g++ && \
+        export CGO_ENABLED=1 && \
+        export GOOS=${TARGETOS} && \
+        export GOARCH=${TARGETARCH} && \
+        go build -a -trimpath -ldflags="-w -s" -o bin/kubeslice-gw-sidecar main.go; \
+    else \
+        CGO_ENABLED=1 \
+        GOOS=${TARGETOS} \
+        GOARCH=${TARGETARCH} \
+        go build -a -trimpath -ldflags="-w -s" -o bin/kubeslice-gw-sidecar main.go; \
+    fi
 
 # Final stage - use TARGETPLATFORM for correct base image
 FROM --platform=$TARGETPLATFORM alpine:3.21
