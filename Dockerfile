@@ -18,8 +18,9 @@
 #limitations under the License.
 ##########################################################
 
-# Build stage - use BUILDPLATFORM for native compilation
-FROM --platform=$BUILDPLATFORM golang:1.24-alpine3.21 AS gobuilder
+# Build stage - use Debian-based image for better cross-compilation support
+# For ARM64 cross-compilation, we need proper toolchains which Alpine doesn't provide
+FROM --platform=$BUILDPLATFORM golang:1.24-bullseye AS gobuilder
 
 # Multi-arch build arguments
 ARG TARGETPLATFORM
@@ -29,13 +30,19 @@ ARG TARGETARCH
 
 # Install build dependencies
 # Git is required for fetching the dependencies.
-# build-base is needed for CGO compilation
-# For cross-compilation, we need the target architecture's toolchain
-RUN apk update && apk add --no-cache git make build-base && \
-    if [ "$TARGETARCH" != "amd64" ]; then \
-        apk add --no-cache gcc-aarch64-linux-gnu g++-aarch64-linux-gnu || \
-        apk add --no-cache crossbuild-essential-arm64 || \
-        echo "Warning: ARM64 cross-compilation toolchain not available via apk"; \
+# build-essential provides gcc/g++ for CGO compilation
+# For ARM64 cross-compilation, install gcc-aarch64-linux-gnu
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    build-essential \
+    ca-certificates && \
+    if [ "$TARGETARCH" = "arm64" ]; then \
+        apt-get install -y --no-install-recommends \
+        gcc-aarch64-linux-gnu \
+        g++-aarch64-linux-gnu && \
+        rm -rf /var/lib/apt/lists/*; \
+    else \
+        rm -rf /var/lib/apt/lists/*; \
     fi
 
 WORKDIR /workspace
@@ -55,11 +62,11 @@ COPY . .
 # For ARM64 cross-compilation, we need to set CC and CXX to the cross-compiler
 RUN --mount=type=cache,target=/root/.cache/go-build \
     if [ "$TARGETARCH" = "arm64" ]; then \
-        export CC=aarch64-linux-gnu-gcc && \
-        export CXX=aarch64-linux-gnu-g++ && \
-        export CGO_ENABLED=1 && \
-        export GOOS=${TARGETOS} && \
-        export GOARCH=${TARGETARCH} && \
+        CC=aarch64-linux-gnu-gcc \
+        CXX=aarch64-linux-gnu-g++ \
+        CGO_ENABLED=1 \
+        GOOS=${TARGETOS} \
+        GOARCH=${TARGETARCH} \
         go build -a -trimpath -ldflags="-w -s" -o bin/kubeslice-gw-sidecar main.go; \
     else \
         CGO_ENABLED=1 \
