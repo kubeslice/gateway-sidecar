@@ -75,8 +75,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
         go build -a -trimpath -ldflags="-w -s" -o bin/kubeslice-gw-sidecar main.go; \
     fi
 
-# Final stage - use TARGETPLATFORM for correct base image
-FROM --platform=$TARGETPLATFORM alpine:3.21
+# Final stage - use Debian-based image for glibc compatibility (since we build with CGO_ENABLED=1)
+FROM --platform=$TARGETPLATFORM debian:bullseye-slim
 
 # Multi-arch build arguments
 ARG TARGETPLATFORM
@@ -89,9 +89,14 @@ LABEL maintainer="Avesha Systems" \
       org.opencontainers.image.architecture=${TARGETARCH} \
       org.opencontainers.image.os=${TARGETOS}
 
-# tc - is needed for traffic control and shaping on the sidecar. it is part of the iproute2
-RUN apk add --no-cache ca-certificates iproute2 && \
-    rm -rf /var/cache/apk/*
+# Install required packages: ca-certificates, iproute2 (for tc command), and libc6 for glibc
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    ca-certificates \
+    iproute2 \
+    libc6 \
+    && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy our static executable from builder stage
 COPY --from=gobuilder /workspace/bin/kubeslice-gw-sidecar /kubeslice-gw-sidecar
