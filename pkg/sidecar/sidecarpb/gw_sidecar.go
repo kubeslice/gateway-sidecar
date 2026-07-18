@@ -130,10 +130,16 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 	gwIP := net.ParseIP(conContext.GetRemoteSliceGwVpnIP())
 
 	route := netlink.Route{Dst: dstIPNet, Gw: gwIP}
-	log.Infof("RouteAdd args %v, %v ", dstIPNet, gwIP)
+	log.Infof("RouteReplace args %v, %v ", dstIPNet, gwIP)
 
-	if err := netlink.RouteAdd(&route); err != nil {
-		log.Errorf("Gateway Pod RouteAdd Failed : %v", err)
+	// Use RouteReplace instead of RouteAdd so this route wins over any existing
+	// route for the same destination. In a HubAndSpoke topology a spoke's gateway
+	// is asked to route the entire slice subnet via the tunnel to the hub, but NSM
+	// already installs a route for the slice subnet via the nsm interface; RouteAdd
+	// would fail with "file exists" and leave spoke-to-spoke traffic looping back to
+	// the slice router. RouteReplace is also idempotent across reconciles.
+	if err := netlink.RouteReplace(&route); err != nil {
+		log.Errorf("Gateway Pod RouteReplace Failed : %v", err)
 	}
 
 	if checkIfVppIntfPresent() {
