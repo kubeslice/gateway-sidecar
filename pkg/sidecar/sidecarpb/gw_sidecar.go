@@ -154,9 +154,36 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 			log.Errorf("VPP Gateway RouteAdd Failed : %v", err)
 		}
 	}
+	// Clamp the TCP MSS of connections crossing the tunnel to the path MTU. The
+	// pod-side NSM interface is MTU 1500 while the OpenVPN tunnel (tun0) is smaller,
+	// so full-size segments would otherwise be silently dropped (no "fragmentation
+	// needed" ICMP -> PMTU black hole) and TCP would stall. Required for
+	// spoke-to-spoke traffic (which crosses two tunnels), and also fixes plain
+	// hub-to-spoke transfers.
+	ensureTunnelMSSClamp()
+
 	log.Infof("Connection Context Updated Successfully")
 
 	return &SidecarResponse{StatusMsg: "Connection Context Updated Successfully"}, nil
+}
+
+// ensureTunnelMSSClamp installs, idempotently, an iptables rule that clamps the
+// TCP MSS of forwarded connections leaving via the tunnel interface (tun0) to the
+// tunnel's path MTU. This is the standard remedy for tunnel MTU mismatches used
+// by CNIs such as Flannel and Calico (--clamp-mss-to-pmtu).
+func ensureTunnelMSSClamp() {
+	const (
+		checkCmd = "iptables -t mangle -C FORWARD -o tun0 -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu"
+		addCmd   = "iptables -t mangle -A FORWARD -o tun0 -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu"
+	)
+	if _, err := runCommand(checkCmd); err == nil {
+		return // rule already present
+	}
+	if out, err := runCommand(addCmd); err != nil {
+		log.Errorf("Failed to add TCP MSS clamp rule on tun0: %v (%v)", err, out)
+		return
+	}
+	log.Infof("Installed TCP MSS clamp (clamp-mss-to-pmtu) on tun0")
 }
 
 func (s *GwSidecar) UpdateSliceQosProfile(ctx context.Context, qosProfile *SliceQosProfile) (*SidecarResponse, error) {
