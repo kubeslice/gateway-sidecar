@@ -129,17 +129,22 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 	}
 	gwIP := net.ParseIP(conContext.GetRemoteSliceGwVpnIP())
 
-	route := netlink.Route{Dst: dstIPNet, Gw: gwIP}
-	log.Infof("RouteReplace args %v, %v ", dstIPNet, gwIP)
-
-	// Use RouteReplace instead of RouteAdd so this route wins over any existing
-	// route for the same destination. In a HubAndSpoke topology a spoke's gateway
-	// is asked to route the entire slice subnet via the tunnel to the hub, but NSM
-	// already installs a route for the slice subnet via the nsm interface; RouteAdd
-	// would fail with "file exists" and leave spoke-to-spoke traffic looping back to
-	// the slice router. RouteReplace is also idempotent across reconciles.
-	if err := netlink.RouteReplace(&route); err != nil {
-		log.Errorf("Gateway Pod RouteReplace Failed : %v", err)
+	// Program the tunnel route as two halves of the requested subnet (one bit more
+	// specific) rather than the subnet itself. NSM continuously reconciles a route
+	// for the whole slice subnet via the nsm interface using the SAME prefix we
+	// want (e.g. 10.11.0.0/16); a RouteReplace on that exact prefix only wins until
+	// NSM re-asserts, so the route FLAPS between nsm0 and tun0 and spoke-to-spoke
+	// traffic intermittently black-holes. Installing e.g. 10.11.0.0/17 + 10.11.128.0/17
+	// makes the tunnel routes strictly more specific than NSM's /16, so longest-prefix
+	// match always selects the tunnel and NSM can never overwrite them. The local
+	// subnet route (a /20 that NSM owns) stays more specific still, so local delivery
+	// is unaffected. RouteReplace keeps each write idempotent across reconciles.
+	for _, half := range moreSpecificHalves(dstIPNet) {
+		route := netlink.Route{Dst: half, Gw: gwIP}
+		log.Infof("RouteReplace args %v, %v ", half, gwIP)
+		if err := netlink.RouteReplace(&route); err != nil {
+			log.Errorf("Gateway Pod RouteReplace Failed : %v", err)
+		}
 	}
 
 	if checkIfVppIntfPresent() {
@@ -165,6 +170,28 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 	log.Infof("Connection Context Updated Successfully")
 
 	return &SidecarResponse{StatusMsg: "Connection Context Updated Successfully"}, nil
+}
+
+// moreSpecificHalves splits a subnet into its two halves, one bit more specific
+// than the input (e.g. 10.11.0.0/16 -> 10.11.0.0/17, 10.11.128.0/17). This is used
+// so the tunnel route out-specifies NSM's same-prefix route and cannot be
+// overwritten by NSM's reconcile. A host route (or a subnet that cannot be split
+// further) is returned unchanged.
+func moreSpecificHalves(dst *net.IPNet) []*net.IPNet {
+	ones, bits := dst.Mask.Size()
+	if bits == 0 || ones >= bits {
+		return []*net.IPNet{dst}
+	}
+	half := net.CIDRMask(ones+1, bits)
+	lower := dst.IP.Mask(half)
+	// upper half: set the bit at position `ones` in the network address
+	upper := make(net.IP, len(lower))
+	copy(upper, lower)
+	upper[ones/8] |= 1 << uint(7-(ones%8))
+	return []*net.IPNet{
+		{IP: lower, Mask: half},
+		{IP: upper, Mask: half},
+	}
 }
 
 // ensureTunnelMSSClamp installs, idempotently, an iptables rule that clamps the
