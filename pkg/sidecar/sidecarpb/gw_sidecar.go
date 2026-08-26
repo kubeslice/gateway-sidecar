@@ -19,6 +19,7 @@ package sidecar
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -198,11 +199,19 @@ func moreSpecificHalves(dst *net.IPNet) []*net.IPNet {
 // TCP MSS of forwarded connections leaving via the tunnel interface (tun0) to the
 // tunnel's path MTU. This is the standard remedy for tunnel MTU mismatches used
 // by CNIs such as Flannel and Calico (--clamp-mss-to-pmtu).
+// tunnelMSSClampCommands returns the iptables check (-C) and add (-A) commands
+// that clamp the TCP MSS of forwarded connections leaving via iface to the path
+// MTU. Kept as a pure, interface-parameterized helper so the rule can be unit
+// tested (and the interface generalized beyond tun0 later).
+func tunnelMSSClampCommands(iface string) (checkCmd, addCmd string) {
+	const spec = "-p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu"
+	checkCmd = fmt.Sprintf("iptables -t mangle -C FORWARD -o %s %s", iface, spec)
+	addCmd = fmt.Sprintf("iptables -t mangle -A FORWARD -o %s %s", iface, spec)
+	return checkCmd, addCmd
+}
+
 func ensureTunnelMSSClamp() {
-	const (
-		checkCmd = "iptables -t mangle -C FORWARD -o tun0 -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu"
-		addCmd   = "iptables -t mangle -A FORWARD -o tun0 -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu"
-	)
+	checkCmd, addCmd := tunnelMSSClampCommands("tun0")
 	if _, err := runCommand(checkCmd); err == nil {
 		return // rule already present
 	}
