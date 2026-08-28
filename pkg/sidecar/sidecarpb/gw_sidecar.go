@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"sync"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/vishvananda/netlink"
@@ -140,13 +141,18 @@ func (s *GwSidecar) UpdateConnectionContext(ctx context.Context, conContext *Sli
 	// match always selects the tunnel and NSM can never overwrite them. The local
 	// subnet route (a /20 that NSM owns) stays more specific still, so local delivery
 	// is unaffected. RouteReplace keeps each write idempotent across reconciles.
+	//
+	// The split is applied to whatever subnet the controller sends (the whole slice
+	// for a spoke's hub gateway when RouteEntireSliceSubnet is set, otherwise the
+	// peer gateway subnet); for a peer subnet the two halves simply cover the same
+	// space, so this is safe in every topology. reconcileTunnelRoutes also withdraws
+	// any previously-programmed halves that are no longer desired, so a topology flip
+	// does not leave a stale relay route behind.
+	desiredRoutes := make([]netlink.Route, 0, 2)
 	for _, half := range moreSpecificHalves(dstIPNet) {
-		route := netlink.Route{Dst: half, Gw: gwIP}
-		log.Infof("RouteReplace args %v, %v ", half, gwIP)
-		if err := netlink.RouteReplace(&route); err != nil {
-			log.Errorf("Gateway Pod RouteReplace Failed : %v", err)
-		}
+		desiredRoutes = append(desiredRoutes, netlink.Route{Dst: half, Gw: gwIP})
 	}
+	reconcileTunnelRoutes(desiredRoutes)
 
 	if checkIfVppIntfPresent() {
 		vppGwIP := net.ParseIP("10.255.255.254")
@@ -195,10 +201,6 @@ func moreSpecificHalves(dst *net.IPNet) []*net.IPNet {
 	}
 }
 
-// ensureTunnelMSSClamp installs, idempotently, an iptables rule that clamps the
-// TCP MSS of forwarded connections leaving via the tunnel interface (tun0) to the
-// tunnel's path MTU. This is the standard remedy for tunnel MTU mismatches used
-// by CNIs such as Flannel and Calico (--clamp-mss-to-pmtu).
 // tunnelMSSClampCommands returns the iptables check (-C) and add (-A) commands
 // that clamp the TCP MSS of forwarded connections leaving via iface to the path
 // MTU. Kept as a pure, interface-parameterized helper so the rule can be unit
@@ -210,6 +212,69 @@ func tunnelMSSClampCommands(iface string) (checkCmd, addCmd string) {
 	return checkCmd, addCmd
 }
 
+var (
+	programmedRoutesMu sync.Mutex
+	// programmedTunnelRoutes tracks the tunnel routes this sidecar last installed,
+	// keyed by destination CIDR. When the desired subnet changes (e.g. a
+	// HubAndSpoke<->FullMesh flip toggles RouteEntireSliceSubnet, changing the
+	// programmed prefix from the whole slice /16 to a peer /24), the now-undesired
+	// routes must be withdrawn instead of left behind to keep relaying traffic.
+	programmedTunnelRoutes = map[string]netlink.Route{}
+)
+
+// staleTunnelRouteKeys returns the destination keys in previous that are not in
+// desired — the routes that were installed on a prior reconcile but are no longer
+// wanted and must be removed. Pure (no netlink) so it can be unit tested.
+func staleTunnelRouteKeys(previous map[string]netlink.Route, desired []netlink.Route) []string {
+	desiredKeys := make(map[string]bool, len(desired))
+	for i := range desired {
+		desiredKeys[desired[i].Dst.String()] = true
+	}
+	var stale []string
+	for key := range previous {
+		if !desiredKeys[key] {
+			stale = append(stale, key)
+		}
+	}
+	return stale
+}
+
+// reconcileTunnelRoutes installs the desired tunnel routes (idempotent via
+// RouteReplace) and withdraws any previously-installed tunnel route that is no
+// longer desired, so a topology/subnet change does not leave a stale relay route
+// behind. It serializes concurrent connection-context updates.
+func reconcileTunnelRoutes(desired []netlink.Route) {
+	programmedRoutesMu.Lock()
+	defer programmedRoutesMu.Unlock()
+
+	stale := staleTunnelRouteKeys(programmedTunnelRoutes, desired)
+
+	for i := range desired {
+		route := desired[i]
+		log.Infof("RouteReplace args %v, %v ", route.Dst, route.Gw)
+		if err := netlink.RouteReplace(&route); err != nil {
+			log.Errorf("Gateway Pod RouteReplace Failed : %v", err)
+		}
+	}
+	for _, key := range stale {
+		old := programmedTunnelRoutes[key]
+		log.Infof("Removing stale tunnel route %v", old.Dst)
+		if err := netlink.RouteDel(&old); err != nil {
+			log.Errorf("Gateway Pod stale tunnel RouteDel Failed for %s : %v", key, err)
+		}
+	}
+
+	next := make(map[string]netlink.Route, len(desired))
+	for i := range desired {
+		next[desired[i].Dst.String()] = desired[i]
+	}
+	programmedTunnelRoutes = next
+}
+
+// ensureTunnelMSSClamp installs, idempotently, an iptables rule that clamps the
+// TCP MSS of forwarded connections leaving via the tunnel interface (tun0) to the
+// tunnel's path MTU. This is the standard remedy for tunnel MTU mismatches used
+// by CNIs such as Flannel and Calico (--clamp-mss-to-pmtu).
 func ensureTunnelMSSClamp() {
 	checkCmd, addCmd := tunnelMSSClampCommands("tun0")
 	if _, err := runCommand(checkCmd); err == nil {
