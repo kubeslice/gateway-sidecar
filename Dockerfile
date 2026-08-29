@@ -45,7 +45,8 @@ FROM alpine:3.21
 # tc - is needed for traffic control and shaping on the sidecar.  it is part of the iproute2
 
 RUN apk add --no-cache ca-certificates \
-    iproute2
+    iproute2 \
+    iptables
 
 # Copy our static executable.
 
