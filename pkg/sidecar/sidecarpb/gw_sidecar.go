@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"sort"
 	"sync"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -236,6 +237,9 @@ func staleTunnelRouteKeys(previous map[string]netlink.Route, desired []netlink.R
 			stale = append(stale, key)
 		}
 	}
+	// Sort so the returned order is deterministic (map iteration is randomized):
+	// keeps route-teardown logging stable and unit tests order-independent.
+	sort.Strings(stale)
 	return stale
 }
 
